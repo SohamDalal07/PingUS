@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:padding="20dp">
+
+    <!-- Color -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="What color is the item? *"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="13sp"
+        android:layout_marginBottom="6dp"/>
+
+    <EditText
+        android:id="@+id/etSecurityColor"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="e.g. Black, Navy blue, Red"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="14sp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:inputType="textCapSentences"
+        android:maxLength="40"
+        android:layout_marginBottom="14dp"/>
+
+    <!-- Brand / Model -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Brand or model? *"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="13sp"
+        android:layout_marginBottom="6dp"/>
+
+    <EditText
+        android:id="@+id/etSecurityBrand"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="e.g. Casio, JBL, Honda, No brand"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="14sp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:inputType="textCapSentences"
+        android:maxLength="40"
+        android:layout_marginBottom="14dp"/>
+
+    <!-- Distinguishing mark -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Any unique mark or detail?"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="13sp"
+        android:layout_marginBottom="6dp"/>
+
+    <EditText
+        android:id="@+id/etSecurityMark"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="e.g. Sticker on back, name written, broken clip"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="14sp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:inputType="textCapSentences"
+        android:maxLength="80"
+        android:layout_marginBottom="6dp"/>
+
+    <!-- Privacy note -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="These answers are never shown publicly. They are only used to confirm you are the real owner when someone claims your item."
+        android:textColor="@color/colorTextSecondary"
+        android:textSize="11sp"
+        android:lineSpacingMultiplier="1.4"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>

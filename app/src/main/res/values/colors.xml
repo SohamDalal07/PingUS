@@ -2,4 +2,70 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="gray">#6B6968</color>
+    <color name="nmims_primary">#4A148C</color>
+    <color name="nmims_secondary">#7B1FA2</color>
+    <color name="nmims_accent">#D500F9</color>
+    <color name="nmims_background">#F3E5F5</color>
+    <color name="nmims_text_primary">#FFFFFF</color>
+    <color name="nmims_text_secondary">#B39DDB</color>
+    <color name="colorPrimary">#0D9488</color>
+    <color name="colorPrimaryDark">#0A7268</color>
+    <color name="colorPrimaryLight">#CCFBF1</color>
+    <color name="colorAccent">#F97316</color>
+    <color name="colorBackground">#F0FDFB</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorSurfaceVariant">#E6FAF8</color>
+    <color name="colorSilver">#C8CACF</color>
+    <color name="colorTip">#F7F0F1</color>
+
+    <!-- Status badges — fixed, never change -->
+    <color name="colorLostBg">#FDECEA</color>
+    <color name="colorLostText">#B71C1C</color>
+    <color name="colorFoundBg">#E8F5E9</color>
+    <color name="colorFoundText">#1B5E20</color>
+    <color name="colorClaimedBg">#E0F2FE</color>
+    <color name="colorClaimedText">#075985</color>
+
+    <!-- School dept tags -->
+    <color name="colorMPSTMEBg">#CCFBF1</color>
+    <color name="colorMPSTMEText">#0F6E56</color>
+    <color name="colorSPPBg">#E8F5E9</color>
+    <color name="colorSPPText">#1B5E20</color>
+
+    <!-- Chips -->
+    <color name="colorChipSelected">#0D9488</color>
+    <color name="colorChipSelectedText">#FFFFFF</color>
+    <color name="colorChipUnselected">#CCFBF1</color>
+    <color name="colorChipUnselectedText">#0F6E56</color>
+
+    <!-- Text -->
+    <color name="colorTextPrimary">#1A1A1A</color>
+    <color name="colorTextSecondary">#666666</color>
+    <color name="colorTextHint">#AAAAAA</color>
+    <color name="colorTextOnPrimary">#FFFFFF</color>
+
+    <!-- Borders & dividers -->
+    <color name="colorDivider">#E0F2F0</color>
+    <color name="colorBorder">#B2DFDB</color>
+
+    <!-- Tip / info strip -->
+    <color name="colorTipBg">#E6FAF8</color>
+    <color name="colorTipText">#0A7268</color>
+    <color name="colorTipBorder">#0D9488</color>
+
+    <!-- Danger / sign out -->
+    <color name="colorDanger">#EF4444</color>
+    <color name="colorDangerBg">#FDECEA</color>
+
+    <!-- Bottom nav -->
+    <color name="colorNavActive">#0D9488</color>
+    <color name="colorNavInactive">#AAAAAA</color>
+
+    <!-- Avatar background -->
+    <color name="colorAvatarBg">#0D9488</color>
+    <color name="colorAvatarText">#FFFFFF</color>
+
+    <!-- Skeleton / placeholder -->
+    <color name="colorPlaceholder">#D1FAF5</color>
 </resources>

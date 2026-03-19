@@ -1,3 +1,73 @@
 <resources>
     <string name="app_name">BackToYou</string>
+
+    <string-array name="categories_personal">
+        <item>Select personal category…</item>
+        <item>Mobile phone / Tablet</item>
+        <item>Earphones / AirPods</item>
+        <item>Charger / Power bank</item>
+        <item>Wallet / Purse</item>
+        <item>Watch / Jewellery</item>
+        <item>Spectacles</item>
+        <item>Umbrella</item>
+        <item>Bag / Backpack</item>
+        <item>Water bottle</item>
+        <item>Cash / Card</item>
+        <item>Clothing / Footwear</item>
+        <item>Other</item>
+    </string-array>
+
+    <!-- Category Dropdown 2 — Academic -->
+    <string-array name="categories_academic">
+        <item>Select academic / campus category…</item>
+        <item>ID card / Library card</item>
+        <item>Keys (room / bike / locker)</item>
+        <item>Calculator (scientific)</item>
+        <item>USB drive / Hard drive</item>
+        <item>Lab coat / Apron</item>
+        <item>Safety goggles</item>
+        <item>Lab notebook / Record book</item>
+        <item>Drawing instruments / Drafter</item>
+        <item>Lab equipment (mortar, spatula)</item>
+        <item>Tools / Soldering kit</item>
+        <item>Project components (Arduino, IC)</item>
+        <item>Reference books / Notes</item>
+        <item>Other</item>
+    </string-array>
+    <!-- Location Dropdown -->
+    <string-array name="locations_shirpur">
+        <item>Select location…</item>
+        <item>MPSTME Block — Ground Floor</item>
+        <item>MPSTME Block — 1st Floor</item>
+        <item>MPSTME Block — 2nd Floor</item>
+        <item>MPSTME Block — 3rd Floor</item>
+        <item>SPP Block — Ground Floor</item>
+        <item>SPP Block — 1st Floor</item>
+        <item>SPP Block — 2nd Floor</item>
+        <item>Central Library</item>
+        <item>Computer Lab</item>
+        <item>Pharmacy Lab</item>
+        <item>Workshop / Fabrication Lab</item>
+        <item>Seminar Hall 1</item>
+        <item>Seminar Hall 2</item>
+        <item>Main Canteen</item>
+        <item>Juice Corner / Tuck Shop</item>
+        <item>Admin Block / Reception</item>
+        <item>ATM / Bank Area</item>
+        <item>Boys Hostel — Block A</item>
+        <item>Boys Hostel — Block B</item>
+        <item>Girls Hostel</item>
+        <item>Hostel Common Room</item>
+        <item>Hostel Mess</item>
+        <item>Basketball Court</item>
+        <item>Cricket Ground</item>
+        <item>Football Ground</item>
+        <item>Gym</item>
+        <item>Campus Gate / Entry</item>
+        <item>Parking Area (2-wheelers)</item>
+        <item>Parking Area (4-wheelers)</item>
+        <item>Garden / Open Area</item>
+        <item>Medical Centre</item>
+        <item>Other (describe in notes)</item>
+    </string-array>
 </resources>
