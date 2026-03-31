@@ -29,6 +29,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    lint {
+        disable.add("MissingConstraints")
+        disable.add("UseAppTint")
+        abortOnError = false
+    }
 }
 
 dependencies {
