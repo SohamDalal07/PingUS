@@ -35,8 +35,8 @@ public class Home extends AppCompatActivity {
                 return true;
             }
             else if (itemId == R.id.navigation_profile) {
-                startActivity(new Intent(Home.this, AlertsActivity.class));
-                return true;}
+                return true;
+            }
 
             else if (itemId == R.id.navigation_home) {
                 // Already on Home
@@ -44,6 +44,7 @@ public class Home extends AppCompatActivity {
             }
             return false;
         });
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
