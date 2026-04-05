@@ -1,10 +1,10 @@
 package com.example.backtoyou;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -12,17 +12,28 @@ import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import android.content.Intent;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class Login_page extends AppCompatActivity {
 
-    // Sign In Views
+    private View mainRoot;
     private TextInputEditText emailSignIn, passwordSignIn;
     private TextInputLayout emailLayoutSignIn, passwordLayoutSignIn;
     private CheckBox keepSignedIn;
@@ -30,7 +41,6 @@ public class Login_page extends AppCompatActivity {
     private MaterialButton btnSignIn, btnUniversitySso;
     private FrameLayout signInForm, createAccountForm;
 
-    // Create Account Views
     private TextInputEditText fullName, emailSignUp, studentId, role, department, phone;
     private TextInputEditText passwordSignUp, confirmPassword;
     private TextInputLayout fullNameLayout, emailLayoutSignUp, studentIdLayout, roleLayout;
@@ -39,10 +49,8 @@ public class Login_page extends AppCompatActivity {
     private MaterialButton btnCreateAccount;
     private TextView linkSignIn;
 
-    // Tab Buttons
-    private Button tabSignIn, tabCreateAccount;
+    private View pageDotLeft, pageDotMid, pageDotRight;
 
-    // Password Strength Indicator
     private View strengthBar1, strengthBar2, strengthBar3;
 
     @Override
@@ -58,18 +66,18 @@ public class Login_page extends AppCompatActivity {
 
         initializeViews();
         setUpListeners();
+        switchToSignIn();
     }
 
     private void initializeViews() {
-        // Tab Buttons
-        tabSignIn = findViewById(R.id.tab_sign_in);
-        tabCreateAccount = findViewById(R.id.tab_create_account);
-
-        // Forms
+        mainRoot = findViewById(R.id.main);
         signInForm = findViewById(R.id.sign_in_form);
         createAccountForm = findViewById(R.id.create_account_form);
 
-        // Sign In Views
+        pageDotLeft = findViewById(R.id.page_dot_left);
+        pageDotMid = findViewById(R.id.page_dot_mid);
+        pageDotRight = findViewById(R.id.page_dot_right);
+
         emailSignIn = findViewById(R.id.email_signin);
         passwordSignIn = findViewById(R.id.password_signin);
         emailLayoutSignIn = findViewById(R.id.email_input_layout_signin);
@@ -80,7 +88,6 @@ public class Login_page extends AppCompatActivity {
         btnUniversitySso = findViewById(R.id.btn_university_sso);
         linkCreateAccount = findViewById(R.id.link_create_account);
 
-        // Create Account Views
         fullName = findViewById(R.id.fullname);
         emailSignUp = findViewById(R.id.email_signup);
         studentId = findViewById(R.id.student_id);
@@ -101,28 +108,24 @@ public class Login_page extends AppCompatActivity {
         btnCreateAccount = findViewById(R.id.btn_create_account);
         linkSignIn = findViewById(R.id.link_sign_in);
 
-        // Password Strength Indicator
         strengthBar1 = findViewById(R.id.strength_bar_1);
         strengthBar2 = findViewById(R.id.strength_bar_2);
         strengthBar3 = findViewById(R.id.strength_bar_3);
     }
 
     private void setUpListeners() {
-        // Tab switching
-        tabSignIn.setOnClickListener(v -> switchToSignIn());
-        tabCreateAccount.setOnClickListener(v -> switchToCreateAccount());
+        pageDotLeft.setOnClickListener(v -> switchToSignIn());
+        pageDotMid.setOnClickListener(v -> switchToSignIn());
+        pageDotRight.setOnClickListener(v -> switchToCreateAccount());
 
-        // Sign In form
         btnSignIn.setOnClickListener(v -> handleSignIn());
         btnUniversitySso.setOnClickListener(v -> handleSSO());
         forgotPasswordLink.setOnClickListener(v -> handleForgotPassword());
         linkCreateAccount.setOnClickListener(v -> switchToCreateAccount());
 
-        // Create Account form
         btnCreateAccount.setOnClickListener(v -> handleCreateAccount());
         linkSignIn.setOnClickListener(v -> switchToSignIn());
 
-        // Password strength indicator
         passwordSignUp.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -137,22 +140,41 @@ public class Login_page extends AppCompatActivity {
         });
     }
 
+    private void applyStatusBarAppearance(boolean lightStatusBarIcons) {
+        WindowInsetsControllerCompat c = WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        c.setAppearanceLightStatusBars(lightStatusBarIcons);
+    }
+
+    private void updatePageDots(boolean signupMode) {
+        int dimLogin = ContextCompat.getColor(this, R.color.auth_dot_inactive_login);
+        int dimSignup = ContextCompat.getColor(this, R.color.auth_dot_inactive_signup);
+        int selected = Color.WHITE;
+
+        if (!signupMode) {
+            pageDotLeft.setBackgroundTintList(android.content.res.ColorStateList.valueOf(dimLogin));
+            pageDotMid.setBackgroundTintList(android.content.res.ColorStateList.valueOf(selected));
+            pageDotRight.setBackgroundTintList(android.content.res.ColorStateList.valueOf(dimLogin));
+        } else {
+            pageDotLeft.setBackgroundTintList(android.content.res.ColorStateList.valueOf(dimSignup));
+            pageDotMid.setBackgroundTintList(android.content.res.ColorStateList.valueOf(dimSignup));
+            pageDotRight.setBackgroundTintList(android.content.res.ColorStateList.valueOf(selected));
+        }
+    }
+
     private void switchToSignIn() {
         signInForm.setVisibility(View.VISIBLE);
         createAccountForm.setVisibility(View.GONE);
-        tabSignIn.setBackground(getDrawable(R.drawable.tab_active_background));
-        tabSignIn.setTextColor(getColor(R.color.white));
-        tabCreateAccount.setBackgroundColor(getColor(android.R.color.transparent));
-        tabCreateAccount.setTextColor(getColor(R.color.text_gray));
+        mainRoot.setBackgroundColor(ContextCompat.getColor(this, R.color.auth_login_screen_bg));
+        updatePageDots(false);
+        applyStatusBarAppearance(false);
     }
 
     private void switchToCreateAccount() {
         signInForm.setVisibility(View.GONE);
         createAccountForm.setVisibility(View.VISIBLE);
-        tabSignIn.setBackgroundColor(getColor(android.R.color.transparent));
-        tabSignIn.setTextColor(getColor(R.color.text_gray));
-        tabCreateAccount.setBackground(getDrawable(R.drawable.tab_active_background));
-        tabCreateAccount.setTextColor(getColor(R.color.white));
+        mainRoot.setBackgroundColor(ContextCompat.getColor(this, R.color.auth_signup_screen_bg));
+        updatePageDots(true);
+        applyStatusBarAppearance(true);
     }
 
     private void handleSignIn() {
@@ -161,18 +183,16 @@ public class Login_page extends AppCompatActivity {
 
         boolean isValid = true;
 
-        // Validate email
         if (email.isEmpty()) {
             emailLayoutSignIn.setError("Email is required");
             isValid = false;
-        } else if (!email.endsWith("@university.edu") && !email.contains("@")) {
+        } else if (!email.endsWith("@university.in") && !email.contains("@")) {
             emailLayoutSignIn.setError("Must be a valid university email");
             isValid = false;
         } else {
             emailLayoutSignIn.setError(null);
         }
 
-        // Validate password
         if (password.isEmpty()) {
             passwordLayoutSignIn.setError("Password is required");
             isValid = false;
@@ -184,19 +204,32 @@ public class Login_page extends AppCompatActivity {
         }
 
         if (isValid) {
-            Toast.makeText(this, "Sign in successful!", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to main activity or handle sign in logic
+            btnSignIn.setEnabled(false);
+            btnSignIn.setText(R.string.sign_in_progress);
+
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        btnSignIn.setEnabled(true);
+                        btnSignIn.setText(R.string.auth_log_in);
+
+                        if (task.isSuccessful()) {
+                            Toast.makeText(Login_page.this, "Sign in successful!", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(Login_page.this, Home.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(Login_page.this, "Authentication failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
         }
     }
 
     private void handleSSO() {
         Toast.makeText(this, "University SSO login coming soon", Toast.LENGTH_SHORT).show();
-        // TODO: Implement SSO authentication
     }
 
     private void handleForgotPassword() {
         Toast.makeText(this, "Password reset email sent", Toast.LENGTH_SHORT).show();
-        // TODO: Implement forgot password logic
     }
 
     private void handleCreateAccount() {
@@ -210,7 +243,6 @@ public class Login_page extends AppCompatActivity {
 
         boolean isValid = true;
 
-        // Validate Full Name
         if (fullNameText.isEmpty()) {
             fullNameLayout.setError("Full name is required");
             isValid = false;
@@ -218,18 +250,16 @@ public class Login_page extends AppCompatActivity {
             fullNameLayout.setError(null);
         }
 
-        // Validate Email
         if (emailText.isEmpty()) {
             emailLayoutSignUp.setError("Email is required");
             isValid = false;
-        } else if (!emailText.endsWith("@university.edu") && !emailText.contains("@")) {
+        } else if (!emailText.endsWith("@university.in") && !emailText.contains("@")) {
             emailLayoutSignUp.setError("Must be a valid university email");
             isValid = false;
         } else {
             emailLayoutSignUp.setError(null);
         }
 
-        // Validate Student ID
         if (studentIdText.isEmpty()) {
             studentIdLayout.setError("Student/Staff ID is required");
             isValid = false;
@@ -237,7 +267,6 @@ public class Login_page extends AppCompatActivity {
             studentIdLayout.setError(null);
         }
 
-        // Validate Role
         if (roleText.isEmpty()) {
             roleLayout.setError("Role is required");
             isValid = false;
@@ -245,7 +274,6 @@ public class Login_page extends AppCompatActivity {
             roleLayout.setError(null);
         }
 
-        // Validate Department
         if (departmentText.isEmpty()) {
             departmentLayout.setError("Department is required");
             isValid = false;
@@ -253,7 +281,13 @@ public class Login_page extends AppCompatActivity {
             departmentLayout.setError(null);
         }
 
-        // Validate Password
+        if (phone.getText().toString().trim().isEmpty()) {
+            phoneLayout.setError("Phone number is required");
+            isValid = false;
+        } else {
+            phoneLayout.setError(null);
+        }
+
         if (passwordText.isEmpty()) {
             passwordLayoutSignUp.setError("Password is required");
             isValid = false;
@@ -264,7 +298,6 @@ public class Login_page extends AppCompatActivity {
             passwordLayoutSignUp.setError(null);
         }
 
-        // Validate Confirm Password
         if (confirmPasswordText.isEmpty()) {
             confirmPasswordLayout.setError("Please confirm password");
             isValid = false;
@@ -275,20 +308,54 @@ public class Login_page extends AppCompatActivity {
             confirmPasswordLayout.setError(null);
         }
 
-        // Validate Terms
         if (!termsCheckbox.isChecked()) {
             Toast.makeText(this, "Please agree to terms and conditions", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
         if (isValid) {
-            showEmailVerificationDialog();
-            clearCreateAccountForm();
+            btnCreateAccount.setEnabled(false);
+            btnCreateAccount.setText(R.string.create_account_progress);
+
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(emailText, passwordText)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            if (user != null) {
+                                String uid = user.getUid();
+                                Map<String, Object> userMap = new HashMap<>();
+                                userMap.put("fullName", fullNameText);
+                                userMap.put("email", emailText);
+                                userMap.put("studentId", studentIdText);
+                                userMap.put("role", roleText);
+                                userMap.put("department", departmentText);
+                                userMap.put("phone", phone.getText().toString().trim());
+                                userMap.put("uid", uid);
+
+                                FirebaseFirestore.getInstance().collection("users")
+                                        .document(uid).set(userMap)
+                                        .addOnCompleteListener(dbTask -> {
+                                            btnCreateAccount.setEnabled(true);
+                                            btnCreateAccount.setText(R.string.auth_sign_up);
+
+                                            if (dbTask.isSuccessful()) {
+                                                showEmailVerificationDialog();
+                                                clearCreateAccountForm();
+                                            } else {
+                                                Toast.makeText(Login_page.this, "Failed to store user data.", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }
+                        } else {
+                            btnCreateAccount.setEnabled(true);
+                            btnCreateAccount.setText(R.string.auth_sign_up);
+                            Toast.makeText(Login_page.this, "Account Creation Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
         }
     }
 
     private boolean isPasswordStrong(String password) {
-        // Minimum 8 characters, at least one uppercase, at least one number
         if (password.length() < 8) return false;
         if (!password.matches(".*[A-Z].*")) return false;
         if (!password.matches(".*[0-9].*")) return false;
@@ -329,8 +396,6 @@ public class Login_page extends AppCompatActivity {
 
     private void showEmailVerificationDialog() {
         Toast.makeText(this, "Account created! Please verify your email.", Toast.LENGTH_LONG).show();
-        // TODO: Show proper email verification dialog
-        // For now, navigate back to sign in after 2 seconds
         switchToSignIn();
     }
 
@@ -346,4 +411,3 @@ public class Login_page extends AppCompatActivity {
         termsCheckbox.setChecked(false);
     }
 }
-

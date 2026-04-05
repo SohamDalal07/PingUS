@@ -1,3 +1,74 @@
 <resources>
     <string name="app_name">BackToYou</string>
+
+    <!-- App Branding -->
+    <string name="app_logo">App Logo</string>
+    <string name="app_name_unifind">UniFind</string>
+    <string name="app_tagline">Lost it? Find it. BackToYou.</string>
+
+    <!-- Auth screen (reference layout) -->
+    <string name="auth_title_login">LOGIN</string>
+    <string name="auth_subtitle_login">TO CONTINUE</string>
+    <string name="auth_title_signup">SIGN UP</string>
+    <string name="auth_subtitle_signup">FOR YOUR ACCOUNT</string>
+    <string name="auth_log_in">LOG IN</string>
+    <string name="auth_sign_up">SIGN UP</string>
+    <string name="sign_in_progress">Signing in…</string>
+    <string name="create_account_progress">Creating account…</string>
+
+    <!-- Sign In Section -->
+    <string name="sign_in">Sign In</string>
+    <string name="university_email">University Email</string>
+    <string name="password">Password</string>
+    <string name="keep_signed_in">Keep me signed in</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="or_continue_with">Or continue with</string>
+    <string name="continue_with_sso">Continue with SSO</string>
+    <string name="no_account">Don\'t have an account?</string>
+
+    <!-- Create Account Section -->
+    <string name="create_account">Create Account</string>
+    <string name="personal_info">Personal Information</string>
+    <string name="full_name">Full Name</string>
+    <string name="email_hint">Use your university domain (@nmims.edu.in)</string>
+    <string name="student_staff_id">Student/Staff ID</string>
+    <string name="role">Role</string>
+    <string name="department">Department</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="phone_hint">Optional (for recovery)</string>
+    <string name="set_password">Set Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="terms_and_conditions">I agree to the Terms and Conditions</string>
+    <string name="already_have_account">Already have an account?</string>
+    
+    <!-- Arrays for PostActivity -->
+    <string-array name="categories_personal">
+        <item>Select Category</item>
+        <item>Phone</item>
+        <item>Wallet</item>
+        <item>Keys</item>
+        <item>ID Card</item>
+        <item>Bag</item>
+        <item>Water Bottle</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="categories_academic">
+        <item>Select Category</item>
+        <item>Book</item>
+        <item>Notes</item>
+        <item>Lab Coat</item>
+        <item>Calculator</item>
+        <item>Laptop</item>
+        <item>Other</item>
+    </string-array>
+    <string-array name="locations_shirpur">
+        <item>Select Location</item>
+        <item>Library</item>
+        <item>Cafeteria</item>
+        <item>Hostel</item>
+        <item>Classroom</item>
+        <item>Lab</item>
+        <item>Grounds</item>
+        <item>Other</item>
+    </string-array>
 </resources>

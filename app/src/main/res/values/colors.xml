@@ -1,5 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="light_gray">#E0E0E0</color>
+    <color name="text_gray">#757575</color>
+    <color name="colorBorder">#BDBDBD</color>
+
+    <!-- Branding & UI -->
+    <color name="navy_blue">#1A237E</color>
+    <color name="colorSurface">#FFFFFF</color>
+
+    <!-- Status & Badge Colors -->
+    <color name="colorClaimedBg">#4CAF50</color>
+    <color name="colorFoundBg">#2196F3</color>
+    <color name="colorLostBg">#F44336</color>
+    <color name="colorChipSelected">#1A237E</color>
+    <color name="colorChipUnselected">#F5F5F5</color>
+    <color name="colorMPSTMEBg">#E3F2FD</color>
+
+    <!-- Theme standard colors -->
+    <color name="colorPrimary">#1A237E</color>
+    <color name="colorPrimaryDark">#121858</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorBackground">#F5F5F5</color>
+
+    <!-- NMIMS Branding -->
+    <color name="nmims_primary">#B71C1C</color>
+    <color name="nmims_secondary">#0D47A1</color>
+    <color name="nmims_accent">#FFD600</color>
+    <color name="nmims_background">#FFFFFF</color>
+    <color name="nmims_text_primary">#212121</color>
+    <color name="nmims_text_secondary">#757575</color>
+    
+    <!-- Added missing colors -->
+    <color name="colorTextPrimary">#212121</color>
+    <color name="colorTextSecondary">#757575</color>
+    <color name="colorTextOnPrimary">#FFFFFF</color>
+    <color name="colorTextHint">#9E9E9E</color>
+    <color name="colorTipBg">#E3F2FD</color>
+    <color name="colorTipText">#0D47A1</color>
+    
+    <!-- Badge text colors -->
+    <color name="colorLostText">#FFFFFF</color>
+    <color name="colorFoundText">#FFFFFF</color>
+    <color name="colorClaimedText">#FFFFFF</color>
+    <color name="colorMPSTMEText">#0D47A1</color>
+    
+    <!-- Misc additional colors -->
+    <color name="error_red">#D32F2F</color>
+    <color name="success_green">#388E3C</color>
+    <color name="colorChipUnselectedText">#757575</color>
+
+    <!-- Auth / login screens (reference UI) -->
+    <color name="auth_login_screen_bg">#E8A0A8</color>
+    <color name="auth_signup_screen_bg">#F0F0F0</color>
+    <color name="auth_pink_primary">#D85A6A</color>
+    <color name="auth_pink_dark">#C4475A</color>
+    <color name="auth_label_login">#CCFFFFFF</color>
+    <color name="auth_label_signup">#99D85A6A</color>
+    <color name="auth_dot_inactive_login">#66FFFFFF</color>
+    <color name="auth_dot_inactive_signup">#40D85A6A</color>
 </resources>
