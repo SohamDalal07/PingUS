@@ -72,34 +72,31 @@
     <string name="terms_and_conditions">I agree to the Terms and Conditions</string>
     <string name="already_have_account">Already have an account?</string>
     
-    <!-- Arrays for PostActivity -->
-    <string-array name="categories_personal">
-        <item>Select Category</item>
-        <item>Phone</item>
-        <item>Wallet</item>
-        <item>Keys</item>
-        <item>ID Card</item>
-        <item>Bag</item>
-        <item>Water Bottle</item>
-        <item>Other</item>
-    </string-array>
-    <string-array name="categories_academic">
-        <item>Select Category</item>
-        <item>Book</item>
-        <item>Notes</item>
-        <item>Lab Coat</item>
-        <item>Calculator</item>
-        <item>Laptop</item>
-        <item>Other</item>
-    </string-array>
-    <string-array name="locations_shirpur">
+    <!-- Post / Lost / Found: campus locations -->
+    <string-array name="locations_campus">
         <item>Select Location</item>
+        <item>Boys Hostel</item>
+        <item>Girls Hostel</item>
+        <item>A Wing</item>
+        <item>B Wing</item>
+        <item>C Wing</item>
+        <item>D Wing</item>
+        <item>CF Canteen</item>
+        <item>Mess</item>
+        <item>Gymnasium</item>
+        <item>Cricket Ground</item>
+        <item>Football Ground</item>
         <item>Library</item>
-        <item>Cafeteria</item>
-        <item>Hostel</item>
-        <item>Classroom</item>
-        <item>Lab</item>
-        <item>Grounds</item>
-        <item>Other</item>
+    </string-array>
+
+    <!-- Item types by category group (matches in-app category cards) -->
+    <string-array name="categories_items">
+        <item>Select Category</item>
+        <item>Electronics</item>
+        <item>Cards &amp; Documents</item>
+        <item>Stationery &amp; Books</item>
+        <item>Keys &amp; Access</item>
+        <item>Bags &amp; Clothing</item>
+        <item>Personal &amp; Others</item>
     </string-array>
 </resources>

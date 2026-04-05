@@ -1,12 +1,11 @@
 package com.example.backtoyou;
 
-import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -41,101 +40,63 @@ public class FeedCardAdapter extends RecyclerView.Adapter<FeedCardAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder h, int position) {
         Map<String, Object> item = items.get(position);
-        Context ctx = h.itemView.getContext();
+
         String title = getString(item, "title");
         String type = getString(item, "type");
         String location = getString(item, "location");
         String category = getString(item, "category");
+        String postedByName = getString(item, "postedByName");
+        String postedByUid = getString(item, "postedByUid");
         long postedAt = item.get("postedAt") != null
                 ? ((Number) item.get("postedAt")).longValue() : 0L;
 
         h.tvTitle.setText(title);
-        h.tvLocation.setText(location + " - " + getTimeAgo(postedAt));
+        h.tvLocation.setText(location);
+        h.tvTimeBadge.setText(getTimeAgo(postedAt));
 
-        switch (type) {
-            case "LOST":
-                h.tvBadge.setText("Lost");
-                h.tvBadge.setBackgroundResource(R.drawable.bg_badge_lost);
-                h.tvBadge.setTextColor(ctx.getColor(R.color.home_lost_text));
-                break;
-            case "FOUND":
-                h.tvBadge.setText("Found");
-                h.tvBadge.setBackgroundResource(R.drawable.bg_badge_found);
-                h.tvBadge.setTextColor(ctx.getColor(R.color.home_found_text));
-                break;
-            default:
-                h.tvBadge.setText("Claimed");
-                h.tvBadge.setBackgroundResource(R.drawable.bg_badge_claimed);
-                h.tvBadge.setTextColor(ctx.getColor(R.color.home_claimed_text));
-                break;
+        int hero = CategoryDrawableHelper.drawableResForCategory(category, R.drawable.bg_home_header_gradient);
+        h.ivItemImage.setImageResource(hero);
+        h.ivItemImage.setImageTintList(null);
+        h.tvUserName.setText(resolvePosterLabel(postedByName, postedByUid));
+
+        if ("LOST".equals(type)) {
+            h.tvStatusBadge.setText("LOST");
+            h.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_lost);
+            h.tvStatusBadge.setTextColor(Color.WHITE);
+            h.btnCardAction.setText("Contact");
+        } else if ("FOUND".equals(type)) {
+            h.tvStatusBadge.setText("FOUND");
+            h.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_found);
+            h.tvStatusBadge.setTextColor(Color.WHITE);
+            h.btnCardAction.setText("Claim");
+        } else {
+            h.tvStatusBadge.setText("CLAIMED");
+            h.tvStatusBadge.setBackgroundResource(R.drawable.bg_badge_claimed);
+            h.tvStatusBadge.setTextColor(Color.WHITE);
+            h.btnCardAction.setText("View");
         }
 
-        setCategoryIcon(ctx, h, category);
+        // Use the item bound to this row. Listener is replaced on every bind, so this stays
+        // correct after recycling (unlike capturing a position int from bind).
+        View.OnClickListener openDetailsClick = v -> {
+            if (listener == null) return;
+            listener.onItemClick(item);
+        };
 
-        h.tvDept.setText("NMIMS");
-        h.tvDept.setBackgroundResource(R.drawable.bg_dept_tag);
-        h.tvDept.setTextColor(ctx.getColor(R.color.home_hint_text));
-
-        h.itemView.setOnClickListener(v -> listener.onItemClick(item));
-        h.itemView.setOnTouchListener((v, event) -> {
-            switch (event.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    v.animate().scaleX(0.98f).scaleY(0.98f).setDuration(120).start();
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    v.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
-                    break;
-                default:
-                    break;
-            }
-            return false;
-        });
+        h.itemView.setOnClickListener(openDetailsClick);
+        h.ivItemImage.setOnClickListener(openDetailsClick);
+        h.ivUserAvatar.setOnClickListener(openDetailsClick);
+        h.tvTitle.setOnClickListener(openDetailsClick);
+        h.tvLocation.setOnClickListener(openDetailsClick);
+        h.tvStatusBadge.setOnClickListener(openDetailsClick);
+        h.tvTimeBadge.setOnClickListener(openDetailsClick);
+        h.tvUserName.setOnClickListener(openDetailsClick);
+        h.btnCardAction.setOnClickListener(openDetailsClick);
     }
 
     @Override
     public int getItemCount() {
         return items.size();
-    }
-
-    private void setCategoryIcon(Context ctx, ViewHolder h, String category) {
-        String cat = category.toLowerCase();
-        h.layoutIconBox.setBackgroundResource(R.drawable.bg_home_icon_box);
-
-        if (cat.contains("phone") || cat.contains("tablet") || cat.contains("charger")
-                || cat.contains("earphone") || cat.contains("airpod") || cat.contains("power bank")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_electronics);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_primary_blue));
-        } else if (cat.contains("key")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_keys);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_found_text));
-        } else if (cat.contains("lab coat") || cat.contains("apron")
-                || cat.contains("goggles") || cat.contains("lab equipment")
-                || cat.contains("mortar") || cat.contains("spatula")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_lab);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_found_text));
-        } else if (cat.contains("wallet") || cat.contains("cash") || cat.contains("card")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_wallet);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_lost_text));
-        } else if (cat.contains("bag") || cat.contains("backpack")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_bag);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_meta_text));
-        } else if (cat.contains("water bottle")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_bottle);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_primary_blue));
-        } else if (cat.contains("calculator") || cat.contains("usb") || cat.contains("hard drive")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_electronics);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_primary_blue));
-        } else if (cat.contains("book") || cat.contains("notes") || cat.contains("drawing")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_book);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_found_text));
-        } else if (cat.contains("id card") || cat.contains("library card")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_id);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_primary_blue));
-        } else {
-            h.ivIcon.setImageResource(R.drawable.ic_category_other);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.home_meta_text));
-        }
     }
 
     private String getTimeAgo(long postedAt) {
@@ -156,19 +117,30 @@ public class FeedCardAdapter extends RecyclerView.Adapter<FeedCardAdapter.ViewHo
         return val != null ? val.toString() : "";
     }
 
+    private String resolvePosterLabel(String postedByName, String postedByUid) {
+        if (postedByName != null && !postedByName.trim().isEmpty()) return postedByName.trim();
+        if (postedByUid != null && !postedByUid.trim().isEmpty()) {
+            int len = Math.min(8, postedByUid.length());
+            return "User " + postedByUid.substring(0, len);
+        }
+        return "User";
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
-        LinearLayout layoutIconBox;
-        ImageView ivIcon;
-        TextView tvTitle, tvLocation, tvBadge, tvDept;
+        ImageView ivItemImage, ivUserAvatar;
+        TextView tvTitle, tvLocation, tvStatusBadge, tvTimeBadge, tvUserName;
+        Button btnCardAction;
 
         ViewHolder(@NonNull View v) {
             super(v);
-            layoutIconBox = v.findViewById(R.id.layoutIconBox);
-            ivIcon = v.findViewById(R.id.ivCategoryIcon);
+            ivItemImage = v.findViewById(R.id.ivItemImage);
+            ivUserAvatar = v.findViewById(R.id.ivUserAvatar);
             tvTitle = v.findViewById(R.id.tvItemTitle);
             tvLocation = v.findViewById(R.id.tvItemLocation);
-            tvBadge = v.findViewById(R.id.tvStatusBadge);
-            tvDept = v.findViewById(R.id.tvDeptTag);
+            tvStatusBadge = v.findViewById(R.id.tvStatusBadge);
+            tvTimeBadge = v.findViewById(R.id.tvTimeBadge);
+            tvUserName = v.findViewById(R.id.tvUserName);
+            btnCardAction = v.findViewById(R.id.btnCardAction);
         }
     }
 }

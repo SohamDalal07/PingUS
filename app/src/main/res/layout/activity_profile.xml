@@ -5,414 +5,277 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/home_page_bg"
-    tools:context=".ProfileActivity">
+    android:background="#F8FAFC">
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_content"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipToPadding="false"
         android:fillViewport="true"
-        android:paddingBottom="12dp"
-        app:layout_constraintBottom_toTopOf="@id/nav_divider"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:paddingTop="14dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="16dp">
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
 
-            <TextView
-                android:id="@+id/tvAppTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="PIngUS"
-                android:textAppearance="?attr/textAppearanceHeadline6"
-                android:textColor="@color/home_title_text"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageButton
-                android:id="@+id/actionSearch"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Search"
-                android:padding="8dp"
-                android:src="@drawable/ic_profile_search"
-                app:layout_constraintBottom_toBottomOf="@id/tvAppTitle"
-                app:layout_constraintEnd_toStartOf="@id/notificationFrame"
-                app:layout_constraintTop_toTopOf="@id/tvAppTitle"
-                app:tint="@color/home_title_text" />
-
-            <FrameLayout
-                android:id="@+id/notificationFrame"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                app:layout_constraintBottom_toBottomOf="@id/tvAppTitle"
-                app:layout_constraintEnd_toStartOf="@id/actionMore"
-                app:layout_constraintTop_toTopOf="@id/tvAppTitle">
-
-                <ImageButton
-                    android:id="@+id/actionNotifications"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Notifications"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_profile_bell"
-                    app:tint="@color/home_title_text" />
+            <!-- Banner and Avatar Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_gravity="top|end"
-                    android:layout_marginTop="9dp"
-                    android:layout_marginEnd="9dp"
-                    android:background="@drawable/bg_notification_dot" />
-            </FrameLayout>
-
-            <ImageButton
-                android:id="@+id/actionMore"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="More options"
-                android:padding="8dp"
-                android:src="@drawable/ic_profile_more"
-                app:layout_constraintBottom_toBottomOf="@id/tvAppTitle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tvAppTitle"
-                app:tint="@color/home_title_text" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/bannerCard"
-                android:layout_width="0dp"
-                android:layout_height="90dp"
-                android:layout_marginTop="18dp"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvAppTitle">
-
-                <FrameLayout
+                    android:id="@+id/bannerView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_cover_banner">
+                    android:layout_height="140dp"
+                    android:background="@drawable/bg_home_header_gradient"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:alpha="0.15"
-                        android:background="@drawable/bg_banner_grid" />
-                </FrameLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:id="@+id/tvAvatarInitial"
-                android:layout_width="62dp"
-                android:layout_height="62dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="-31dp"
-                android:background="@drawable/bg_avatar_circle"
-                android:elevation="4dp"
-                android:gravity="center"
-                android:text="S"
-                android:textColor="@android:color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="@id/bannerCard"
-                app:layout_constraintTop_toBottomOf="@id/bannerCard" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnEditProfile"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:layout_marginEnd="12dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:minWidth="0dp"
-                android:text="Edit profile"
-                android:textAllCaps="false"
-                android:textColor="@color/home_meta_text"
-                android:textSize="12sp"
-                app:cornerRadius="20dp"
-                app:icon="@drawable/ic_profile_edit"
-                app:iconGravity="textStart"
-                app:iconPadding="6dp"
-                app:iconSize="14dp"
-                app:iconTint="@color/home_meta_text"
-                app:layout_constraintBottom_toBottomOf="@id/bannerCard"
-                app:layout_constraintEnd_toEndOf="@id/bannerCard"
-                app:strokeColor="@color/dividerColor"
-                app:strokeWidth="1dp" />
-
-            <TextView
-                android:id="@+id/tvProfileName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:text="Soham Dalal"
-                android:textColor="@color/home_title_text"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvAvatarInitial" />
-
-            <TextView
-                android:id="@+id/tvProfileEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="soham.dalal133@nmims.in"
-                android:textColor="@color/home_meta_text"
-                android:textSize="13sp"
-                app:layout_constraintStart_toStartOf="@id/tvProfileName"
-                app:layout_constraintTop_toBottomOf="@id/tvProfileName" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupProfile"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                app:chipSpacingHorizontal="8dp"
-                app:singleLine="true"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvProfileEmail">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipRole"
-                    style="@style/Widget.MaterialComponents.Chip.Entry"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEditProfile"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Student"
-                    android:textColor="@color/profileBlueDark"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Edit profile"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
                     android:textSize="12sp"
-                    app:chipBackgroundColor="@color/profileBlueLight"
-                    app:chipCornerRadius="20dp"
-                    app:chipIcon="@drawable/ic_profile_person"
-                    app:chipIconTint="@color/profileBlueDark"
-                    app:closeIconVisible="false"
-                    app:ensureMinTouchTargetSize="false" />
+                    app:cornerRadius="20dp"
+                    app:icon="@drawable/ic_profile_edit"
+                    app:iconPadding="8dp"
+                    app:iconSize="14dp"
+                    app:iconTint="@color/white"
+                    app:layout_constraintBottom_toBottomOf="@id/bannerView"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="1dp" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipId"
-                    style="@style/Widget.MaterialComponents.Chip.Entry"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="70012300133"
-                    android:textColor="@color/home_meta_text"
-                    android:textSize="12sp"
-                    app:chipBackgroundColor="@android:color/white"
-                    app:chipCornerRadius="20dp"
-                    app:chipIcon="@drawable/ic_profile_id"
-                    app:chipIconTint="@color/home_meta_text"
-                    app:closeIconVisible="false"
-                    app:ensureMinTouchTargetSize="false" />
-            </com.google.android.material.chip.ChipGroup>
+                <TextView
+                    android:id="@+id/tvAvatarInitial"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="-42dp"
+                    android:background="@drawable/bg_avatar_circle"
+                    android:elevation="4dp"
+                    android:gravity="center"
+                    android:text="V"
+                    android:textColor="@android:color/white"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/bannerView" />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- User Info Section -->
             <LinearLayout
-                android:id="@+id/statsRow"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:baselineAligned="false"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/chipGroupProfile">
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/tvProfileName"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/dividerColor"
-                    app:strokeWidth="1dp">
+                    android:text="vansh bansal"
+                    android:textColor="#1E293B"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp">
-
-                        <TextView
-                            android:id="@+id/tvPostsCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="12"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="17sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Posts"
-                            android:textColor="@color/home_meta_text"
-                            android:textSize="11sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <Space
-                    android:layout_width="8dp"
-                    android:layout_height="1dp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/tvProfileEmail"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/dividerColor"
-                    app:strokeWidth="1dp">
+                    android:layout_marginTop="2dp"
+                    android:text="vansh.bansal097@nmims.in"
+                    android:textColor="#64748B"
+                    android:textSize="14sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp">
-
-                        <TextView
-                            android:id="@+id/tvAlertsCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="3"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="17sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Alerts"
-                            android:textColor="@color/home_meta_text"
-                            android:textSize="11sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <Space
-                    android:layout_width="8dp"
-                    android:layout_height="1dp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="@android:color/white"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="@color/dividerColor"
-                    app:strokeWidth="1dp">
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipRole"
+                        style="@style/Widget.MaterialComponents.Chip.Action"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp">
+                        android:text="student"
+                        android:textColor="#4F46E5"
+                        app:chipBackgroundColor="#EEF2FF"
+                        app:chipCornerRadius="16dp"
+                        app:chipIcon="@drawable/ic_profile_person"
+                        app:chipIconTint="#4F46E5" />
 
-                        <TextView
-                            android:id="@+id/tvDeptCode"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="IT"
-                            android:textColor="@color/home_title_text"
-                            android:textSize="17sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="Dept."
-                            android:textColor="@color/home_meta_text"
-                            android:textSize="11sp" />
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipId"
+                        style="@style/Widget.MaterialComponents.Chip.Action"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="70012300097"
+                        android:textColor="#64748B"
+                        app:chipBackgroundColor="@color/white"
+                        app:chipCornerRadius="16dp"
+                        app:chipIcon="@drawable/ic_profile_id"
+                        app:chipIconTint="#64748B"
+                        app:chipStrokeColor="#E2E8F0"
+                        app:chipStrokeWidth="1dp" />
+                </LinearLayout>
             </LinearLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/accountDetailsCard"
-                android:layout_width="0dp"
+            <!-- Stats Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="16dp"
+                android:layout_marginTop="24dp"
+                android:orientation="horizontal"
+                android:paddingHorizontal="24dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_home_stat_card"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvPostsCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#1E293B"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Posts"
+                        android:textColor="#64748B"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="0dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_home_stat_card"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvAlertsCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#1E293B"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Alerts"
+                        android:textColor="#64748B"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="0dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_home_stat_card"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:id="@+id/tvDeptCode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="IT"
+                        android:textColor="#1E293B"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dept."
+                        android:textColor="#64748B"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Account Details Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/statsRow"
-                app:strokeColor="@color/dividerColor"
+                app:strokeColor="#E2E8F0"
                 app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingStart="12dp"
-                        android:paddingTop="12dp"
-                        android:paddingEnd="12dp"
-                        android:paddingBottom="8dp"
+                        android:layout_marginBottom="16dp"
                         android:text="ACCOUNT DETAILS"
-                        android:textAllCaps="true"
-                        android:textColor="@color/home_meta_text"
+                        android:textColor="#64748B"
                         android:textSize="11sp"
-                        android:letterSpacing="0.08"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05" />
 
+                    <!-- Role -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="16dp"
-                        android:paddingTop="10dp"
-                        android:paddingEnd="16dp"
-                        android:paddingBottom="10dp">
+                        android:orientation="horizontal">
 
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_icon_role">
-
-                            <ImageView
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_profile_person"
-                                app:tint="@color/profileBlueDark" />
-                        </FrameLayout>
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="#EEF2FF"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_profile_person"
+                            app:tint="#4F46E5" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="16dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -420,16 +283,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Role"
-                                android:textColor="@color/home_meta_text"
+                                android:textColor="#64748B"
                                 android:textSize="11sp" />
 
                             <TextView
                                 android:id="@+id/tvRoleValue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Student"
-                                android:textColor="@color/home_title_text"
-                                android:textSize="14sp"
+                                android:text="student"
+                                android:textColor="#1E293B"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -437,35 +299,28 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@color/dividerColor" />
+                        android:layout_marginVertical="12dp"
+                        android:background="#F1F5F9" />
 
+                    <!-- ID -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="16dp"
-                        android:paddingTop="10dp"
-                        android:paddingEnd="16dp"
-                        android:paddingBottom="10dp">
+                        android:orientation="horizontal">
 
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_icon_id">
-
-                            <ImageView
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_profile_id"
-                                app:tint="@color/profileGreenDark" />
-                        </FrameLayout>
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="#F0FDF4"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_profile_id"
+                            app:tint="#10B981" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="16dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -473,16 +328,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Student/Staff ID"
-                                android:textColor="@color/home_meta_text"
+                                android:textColor="#64748B"
                                 android:textSize="11sp" />
 
                             <TextView
                                 android:id="@+id/tvStudentIdValue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="70012300133"
-                                android:textColor="@color/home_title_text"
-                                android:textSize="14sp"
+                                android:text="70012300097"
+                                android:textColor="#1E293B"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -490,35 +344,28 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@color/dividerColor" />
+                        android:layout_marginVertical="12dp"
+                        android:background="#F1F5F9" />
 
+                    <!-- Department -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="16dp"
-                        android:paddingTop="10dp"
-                        android:paddingEnd="16dp"
-                        android:paddingBottom="10dp">
+                        android:orientation="horizontal">
 
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_icon_department">
-
-                            <ImageView
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_profile_department"
-                                app:tint="@color/profileAmberDark" />
-                        </FrameLayout>
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="#FFFBEB"
+                            android:padding="8dp"
+                            android:src="@drawable/baseline_emoji_emotions_24"
+                            app:tint="#F59E0B" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="16dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -526,16 +373,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Department"
-                                android:textColor="@color/home_meta_text"
+                                android:textColor="#64748B"
                                 android:textSize="11sp" />
 
                             <TextView
                                 android:id="@+id/tvDepartmentValue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Information Technology"
-                                android:textColor="@color/home_title_text"
-                                android:textSize="14sp"
+                                android:text="IT"
+                                android:textColor="#1E293B"
                                 android:textStyle="bold" />
                         </LinearLayout>
                     </LinearLayout>
@@ -543,35 +389,28 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@color/dividerColor" />
+                        android:layout_marginVertical="12dp"
+                        android:background="#F1F5F9" />
 
+                    <!-- Phone -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="16dp"
-                        android:paddingTop="10dp"
-                        android:paddingEnd="16dp"
-                        android:paddingBottom="10dp">
+                        android:orientation="horizontal">
 
-                        <FrameLayout
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_icon_phone">
-
-                            <ImageView
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_profile_phone"
-                                app:tint="@color/home_meta_text" />
-                        </FrameLayout>
+                        <ImageView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:background="#F8FAFC"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_profile_phone"
+                            app:tint="#64748B" />
 
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
+                            android:layout_marginStart="16dp"
                             android:layout_weight="1"
                             android:orientation="vertical">
 
@@ -579,78 +418,62 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Phone number"
-                                android:textColor="@color/home_meta_text"
+                                android:textColor="#64748B"
                                 android:textSize="11sp" />
 
                             <TextView
                                 android:id="@+id/tvPhoneValue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Not available"
-                                android:textColor="@color/home_meta_text"
-                                android:textSize="14sp"
+                                android:text="7723979716"
+                                android:textColor="#1E293B"
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <ImageButton
+                        <ImageView
                             android:id="@+id/ivPhoneEdit"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Edit phone"
-                            android:padding="6dp"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
                             android:src="@drawable/ic_profile_edit"
-                            app:tint="@color/home_meta_text" />
+                            app:tint="#64748B" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSignOut"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="12dp"
-                android:backgroundTint="@color/profileRedLight"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="24dp"
                 android:text="Sign out"
                 android:textAllCaps="false"
-                android:textColor="@color/profileRedDark"
-                android:textSize="14sp"
+                android:textColor="#991B1B"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#FEE2E2"
                 app:cornerRadius="12dp"
                 app:icon="@drawable/ic_profile_logout"
                 app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconTint="@color/profileRedDark"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/accountDetailsCard"
-                app:strokeColor="@color/profileRedBorder"
-                app:strokeWidth="1dp" />
+                app:iconPadding="12dp"
+                app:iconTint="#991B1B"
+                app:strokeWidth="0dp" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <View
-        android:id="@+id/nav_divider"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="@color/dividerColor"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        app:elevation="0dp"
-        app:itemIconTint="@color/profile_bottom_nav_colors"
-        app:itemTextColor="@color/profile_bottom_nav_colors"
-        app:labelVisibilityMode="labeled"
+        android:background="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu" />
+        app:menu="@menu/home" />
+
+    <!-- compatibility views for binding if needed -->
+    <View android:id="@+id/actionSearch" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <View android:id="@+id/actionNotifications" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
+    <View android:id="@+id/actionMore" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

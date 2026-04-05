@@ -3,16 +3,22 @@
     <style name="Base.Theme.BackToYou" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">@color/nmims_primary</item>
-        <item name="colorPrimaryVariant">@color/nmims_secondary</item>
         <item name="colorSecondary">@color/nmims_secondary</item>
         <item name="colorAccent">@color/nmims_accent</item>
         <item name="android:colorBackground">@color/nmims_background</item>
         <item name="android:textColorPrimary">@color/nmims_text_primary</item>
         <item name="android:textColorSecondary">@color/nmims_text_secondary</item>
     </style>
-<!--    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">-->
-<!--        <item name="colorPrimary">@color/purple_500</item>-->
-<!--        <item name="colorPrimaryDark">@color/purple_700</item>-->
-<!--    </style>-->
+
     <style name="Theme.BackToYou" parent="Base.Theme.BackToYou" />
+
+    <style name="ShapeAppearance.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="ShapeAppearance.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>

@@ -46,28 +46,6 @@
                     android:orientation="vertical"
                     android:theme="@style/ThemeOverlay.Auth.Login.Fields">
 
-                    <!--                    <TextView-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:letterSpacing="0.12"-->
-<!--                        android:text="@string/auth_title_login"-->
-<!--                        android:textAllCaps="true"-->
-<!--                        android:textColor="@color/white"-->
-<!--                        android:textSize="32sp"-->
-<!--                        android:textStyle="bold" />-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginTop="6dp"-->
-<!--                        android:letterSpacing="0.18"-->
-<!--                        android:text="@string/auth_subtitle_login"-->
-<!--                        android:textAllCaps="true"-->
-<!--                        android:textColor="@color/auth_on_login_secondary"-->
-<!--                        android:textSize="13sp"-->
-<!--                        android:textStyle="bold" />-->
-
-
                     <ImageView
                         android:layout_width="400dp"
                         android:layout_height="200dp"
@@ -76,7 +54,7 @@
                         android:adjustViewBounds="true"
                         android:contentDescription="@string/app_logo"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/app_name"></ImageView>
+                        android:src="@drawable/app_name" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/email_input_layout_signin"
@@ -493,7 +471,7 @@
                 </LinearLayout>
             </FrameLayout>
 
-            <!-- Page indicator (reference: 3 dots; middle = login, right = signup) -->
+            <!-- Page indicator -->
             <LinearLayout
                 android:id="@+id/page_dots"
                 android:layout_width="wrap_content"
@@ -522,6 +500,7 @@
                     android:id="@+id/page_dot_right"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
+                    android:layout_marginEnd="10dp"
                     android:background="@drawable/auth_page_dot"
                     android:backgroundTint="@color/auth_dot_inactive_login" />
             </LinearLayout>

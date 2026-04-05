@@ -1,6 +1,7 @@
 package com.example.backtoyou;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -59,17 +61,17 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
             case "LOST":
                 h.tvBadge.setText("Lost");
                 h.tvBadge.setBackgroundResource(R.drawable.bg_badge_lost);
-                h.tvBadge.setTextColor(ctx.getColor(R.color.colorLostText));
+                h.tvBadge.setTextColor(Color.WHITE);
                 break;
             case "FOUND":
                 h.tvBadge.setText("Found");
                 h.tvBadge.setBackgroundResource(R.drawable.bg_badge_found);
-                h.tvBadge.setTextColor(ctx.getColor(R.color.colorFoundText));
+                h.tvBadge.setTextColor(Color.WHITE);
                 break;
             default:
                 h.tvBadge.setText("Claimed");
                 h.tvBadge.setBackgroundResource(R.drawable.bg_badge_claimed);
-                h.tvBadge.setTextColor(ctx.getColor(R.color.colorClaimedText));
+                h.tvBadge.setTextColor(Color.WHITE);
                 break;
         }
 
@@ -85,51 +87,24 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
     @Override public int getItemCount() { return items.size(); }
 
     private void setCategoryIcon(Context ctx, ViewHolder h, String category) {
-        String cat = category.toLowerCase();
-        if (cat.contains("phone") || cat.contains("tablet") || cat.contains("charger")
-                || cat.contains("earphone") || cat.contains("airpod") || cat.contains("power bank")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_electronics);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorClaimedText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_blue);
-        } else if (cat.contains("key")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_keys);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorFoundText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_amber);
-        } else if (cat.contains("lab coat") || cat.contains("apron")
-                || cat.contains("goggles") || cat.contains("lab equipment")
-                || cat.contains("mortar") || cat.contains("spatula")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_lab);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorFoundText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_green);
-        } else if (cat.contains("wallet") || cat.contains("cash") || cat.contains("card")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_wallet);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorLostText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_coral);
-        } else if (cat.contains("bag") || cat.contains("backpack")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_bag);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorTextSecondary));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_gray);
-        } else if (cat.contains("water bottle")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_bottle);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorPrimary));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_teal);
-        } else if (cat.contains("calculator") || cat.contains("usb") || cat.contains("hard drive")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_electronics);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorClaimedText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_blue);
-        } else if (cat.contains("book") || cat.contains("notes") || cat.contains("drawing")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_book);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorFoundText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_amber);
-        } else if (cat.contains("id card") || cat.contains("library card")) {
-            h.ivIcon.setImageResource(R.drawable.ic_category_id);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorClaimedText));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_blue);
-        } else {
-            h.ivIcon.setImageResource(R.drawable.ic_category_other);
-            h.ivIcon.setColorFilter(ctx.getColor(R.color.colorTextSecondary));
-            h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_gray);
+        int res = CategoryDrawableHelper.drawableResForCategory(category, R.drawable.electronics);
+        h.ivIcon.setImageResource(res);
+        h.ivIcon.clearColorFilter();
+        ImageViewCompat.setImageTintList(h.ivIcon, null);
+
+        if (CategoryDrawableHelper.isCampusPhoto(res)) {
+            if (res == R.drawable.electronics) {
+                h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_blue);
+            } else if (res == R.drawable.documents) {
+                h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_purple);
+            } else if (res == R.drawable.stationary) {
+                h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_green);
+            } else {
+                h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_amber);
+            }
+            return;
         }
+        h.layoutIconBox.setBackgroundResource(R.drawable.bg_icon_gray);
     }
 
     private String getTimeAgo(long postedAt) {

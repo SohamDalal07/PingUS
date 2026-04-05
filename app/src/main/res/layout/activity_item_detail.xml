@@ -1,243 +1,263 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
-    android:orientation="vertical">
+    android:background="#F8FAFC">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbarDetail"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:title="Item Details"
-        app:titleTextColor="@color/colorTextOnPrimary"/>
+        android:layout_height="300dp"
+        android:background="@drawable/bg_home_header_gradient">
 
-    <ScrollView
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="#4F46E5"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:titleEnabled="false">
+
+            <ImageView
+                android:id="@+id/ivDetailImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bg_home_header_gradient"
+                app:layout_collapseMode="parallax" />
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarDetail"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="?attr/homeAsUpIndicator"
+                app:navigationIconTint="@color/white" />
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollDetail"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="16dp"
-        android:importantForAccessibility="no">
+        android:layout_height="match_parent"
+        android:layout_marginTop="-32dp"
+        android:background="@drawable/bg_home_stat_card"
+        android:backgroundTint="#F8FAFC"
+        android:paddingTop="32dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="120dp">
 
-            <!-- Title -->
             <TextView
                 android:id="@+id/tvDetailTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorTextPrimary"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"
-                android:text="Item Title"/>
+                android:text="Item Title"
+                android:textColor="#1E293B"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
                 android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
-                
+                android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/tvDetailStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
+                    android:background="@drawable/bg_badge_lost"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="Lost"
                     android:textColor="@color/white"
-                    android:background="@color/colorLostBg"
-                    android:text="Lost"/>
-                    
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
                 <TextView
                     android:id="@+id/tvDetailCategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorTextSecondary"
-                    android:background="@drawable/bg_chip_unselected"
-                    android:text="Category"/>
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_home_stat_card"
+                    android:backgroundTint="#F1F5F9"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="Category"
+                    android:textColor="#64748B"
+                    android:textSize="12sp" />
             </LinearLayout>
 
-            <!-- Location and Time -->
             <TextView
                 android:id="@+id/tvDetailLocationTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorTextSecondary"
-                android:textSize="14sp"
-                android:layout_marginBottom="16dp"
-                android:text="Location · Time"/>
+                android:layout_marginTop="16dp"
+                android:text="Location · Time"
+                android:textColor="#94A3B8"
+                android:textSize="14sp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/colorBorder"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginTop="24dp"
+                android:background="#E2E8F0" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
                 android:text="Description"
-                android:textColor="@color/colorTextPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#1E293B"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvDetailDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorTextPrimary"
-                android:textSize="15sp"
-                android:lineSpacingMultiplier="1.2"
-                android:layout_marginBottom="24dp"
-                android:text="Item description goes here..."/>
-                
-            <!-- Poster Info -->
+                android:layout_marginTop="12dp"
+                android:lineSpacingExtra="4dp"
+                android:text="No description provided."
+                android:textColor="#64748B"
+                android:textSize="15sp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:text="Posted By"
-                android:textColor="@color/colorTextPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:textColor="#1E293B"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/tvDetailPoster"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorTextPrimary"
-                android:textSize="15sp"
-                android:layout_marginBottom="24dp"
-                android:text="Poster Name"/>
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_nav_profile"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.SmallComponent"
+                    app:tint="#4F46E5" />
+
+                <TextView
+                    android:id="@+id/tvDetailPoster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Anonymous"
+                    android:textColor="#1E293B"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- Contact Buttons -->
-    <LinearLayout
-        android:id="@+id/layoutContactButtons"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/layoutBottomActions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="@color/colorBackground"
-        android:elevation="8dp"
-        android:gravity="center"
-        android:visibility="gone"
-        android:orientation="horizontal">
+        android:layout_gravity="bottom"
+        app:cardBackgroundColor="@color/white"
+        app:cardElevation="16dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.LargeComponent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginEnd="32dp">
-            
-            <ImageButton
-                android:id="@+id/btnContactCall"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/bg_chip_selected"
-                android:src="@drawable/ic_call"
-                android:tint="@color/white"
-                android:elevation="4dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Call"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/colorTextSecondary"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginEnd="32dp">
-            
-            <ImageButton
-                android:id="@+id/btnContactEmail"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/bg_chip_selected"
-                android:src="@drawable/ic_email"
-                android:tint="@color/white"
-                android:elevation="4dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/colorTextSecondary"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
-            
-            <ImageButton
-                android:id="@+id/btnContactWhatsapp"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/bg_chip_selected"
-                android:src="@drawable/ic_whatsapp"
-                android:tint="@color/white"
-                android:elevation="4dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="WhatsApp"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/colorTextSecondary"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Claim Item Button -->
-    <LinearLayout
-        android:id="@+id/layoutClaimItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="@color/colorBackground"
-        android:visibility="gone"
-        android:elevation="8dp">
-
-        <Button
-            android:id="@+id/btnClaimItem"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="Claim Item"
-            android:textColor="@color/white"
-            android:textSize="15sp"
-            android:textAllCaps="false"
-            android:textStyle="bold" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-</LinearLayout>
+            <LinearLayout
+                android:id="@+id/layoutContactButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnContactCall"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="Call"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_call"
+                    app:strokeColor="#E2E8F0" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnContactEmail"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="Email"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_email"
+                    app:strokeColor="#E2E8F0" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnContactWhatsapp"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:backgroundTint="#25D366"
+                    android:text=""
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_whatsapp"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutClaimItem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnClaimItem"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:backgroundTint="#4F46E5"
+                    android:text="Claim this item"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="12dp" />
+
+                <TextView
+                    android:id="@+id/tvClaimStatusHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="Tap Claim and answer the security questions. The poster will review your request."
+                    android:textColor="#64748B"
+                    android:textSize="13sp"
+                    android:visibility="visible" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

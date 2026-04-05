@@ -74,11 +74,11 @@
     <color name="home_tab_active_bg">#DBEAFE</color>
     <color name="home_tab_active_text">#1D4ED8</color>
     <color name="home_card_stroke">#E5E7EB</color>
-    <color name="home_found_bg">#D1FAE5</color>
+    <color name="home_found_bg">#22C55E</color>
     <color name="home_found_text">#065F46</color>
-    <color name="home_lost_bg">#FEE2E2</color>
+    <color name="home_lost_bg">#EF4444</color>
     <color name="home_lost_text">#991B1B</color>
-    <color name="home_claimed_bg">#EDE9FE</color>
+    <color name="home_claimed_bg">#7C3AED</color>
     <color name="home_claimed_text">#4C1D95</color>
     <color name="profileBlue">#378ADD</color>
     <color name="profileBlueDark">#185FA5</color>
