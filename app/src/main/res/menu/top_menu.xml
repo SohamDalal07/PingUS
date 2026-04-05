@@ -7,6 +7,11 @@
         android:title="Search"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/action_alerts"
+        android:icon="@drawable/ic_bell"
+        android:title="Alerts"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="Settings"

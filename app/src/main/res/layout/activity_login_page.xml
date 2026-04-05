@@ -5,7 +5,9 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/auth_login_screen_bg">
+    android:background="@color/auth_login_screen_bg"
+    tools:context=".Login_page"
+    tools:theme="@style/Theme.BackToYou">
 
     <ImageView
         android:layout_width="match_parent"
@@ -44,25 +46,37 @@
                     android:orientation="vertical"
                     android:theme="@style/ThemeOverlay.Auth.Login.Fields">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:letterSpacing="0.12"
-                        android:text="@string/auth_title_login"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="32sp"
-                        android:textStyle="bold" />
+                    <!--                    <TextView-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:letterSpacing="0.12"-->
+<!--                        android:text="@string/auth_title_login"-->
+<!--                        android:textAllCaps="true"-->
+<!--                        android:textColor="@color/white"-->
+<!--                        android:textSize="32sp"-->
+<!--                        android:textStyle="bold" />-->
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:letterSpacing="0.18"
-                        android:text="@string/auth_subtitle_login"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="13sp" />
+<!--                    <TextView-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginTop="6dp"-->
+<!--                        android:letterSpacing="0.18"-->
+<!--                        android:text="@string/auth_subtitle_login"-->
+<!--                        android:textAllCaps="true"-->
+<!--                        android:textColor="@color/auth_on_login_secondary"-->
+<!--                        android:textSize="13sp"-->
+<!--                        android:textStyle="bold" />-->
+
+
+                    <ImageView
+                        android:layout_width="400dp"
+                        android:layout_height="200dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="@string/app_logo"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/app_name"></ImageView>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/email_input_layout_signin"
@@ -77,6 +91,7 @@
                             style="@style/Auth.TextInputEdit.Login"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/university_email"
                             android:inputType="textEmailAddress" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,6 +110,7 @@
                             style="@style/Auth.TextInputEdit.Login"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/password"
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -139,50 +155,6 @@
                             app:cornerRadius="10dp"
                             app:elevation="6dp" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="1dp"
-                                android:layout_weight="1"
-                                android:background="@color/auth_dot_inactive_login" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:layout_marginEnd="12dp"
-                                android:text="@string/or_continue_with"
-                                android:textColor="@color/auth_label_login"
-                                android:textSize="11sp"
-                                android:textAllCaps="true" />
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="1dp"
-                                android:layout_weight="1"
-                                android:background="@color/auth_dot_inactive_login" />
-                        </LinearLayout>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_university_sso"
-                            android:layout_width="280dp"
-                            android:layout_height="50dp"
-                            android:layout_marginTop="14dp"
-                            android:text="@string/continue_with_sso"
-                            android:textAllCaps="true"
-                            android:textColor="@color/white"
-                            android:textSize="13sp"
-                            app:backgroundTint="@android:color/transparent"
-                            app:cornerRadius="10dp"
-                            app:elevation="2dp"
-                            app:strokeColor="@color/white"
-                            app:strokeWidth="1dp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -196,7 +168,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/no_account"
-                            android:textColor="@color/auth_label_login"
+                            android:textColor="@color/auth_on_login_secondary"
                             android:textSize="13sp" />
 
                         <TextView
@@ -270,6 +242,7 @@
                             style="@style/Auth.TextInputEdit.Signup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/full_name"
                             android:inputType="textPersonName" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -288,6 +261,7 @@
                             style="@style/Auth.TextInputEdit.Signup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/university_email"
                             android:inputType="textEmailAddress" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -312,6 +286,7 @@
                                 style="@style/Auth.TextInputEdit.Signup"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:contentDescription="@string/student_staff_id"
                                 android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -328,6 +303,7 @@
                                 style="@style/Auth.TextInputEdit.Signup"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:contentDescription="@string/role"
                                 android:inputType="text" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
@@ -345,6 +321,7 @@
                             style="@style/Auth.TextInputEdit.Signup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/department"
                             android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -355,7 +332,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:hint="@string/phone_number"
-                        app:helperText="Preferred as WhatsApp number"
+                        app:helperText="@string/phone_whatsapp_hint"
                         app:helperTextTextColor="@color/auth_label_signup">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -363,6 +340,7 @@
                             style="@style/Auth.TextInputEdit.Signup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/phone_number"
                             android:inputType="phone" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -398,6 +376,7 @@
                             style="@style/Auth.TextInputEdit.Signup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/password"
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -450,6 +429,7 @@
                             style="@style/Auth.TextInputEdit.Signup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:contentDescription="@string/confirm_password"
                             android:inputType="textPassword" />
                     </com.google.android.material.textfield.TextInputLayout>
 

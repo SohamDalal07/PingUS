@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">BackToYou</string>
+    <string name="app_name">PingUS</string>
 
     <!-- App Branding -->
     <string name="app_logo">App Logo</string>
-    <string name="app_name_unifind">UniFind</string>
+    <string name="app_name_unifind">PingUS</string>
     <string name="app_tagline">Lost it? Find it. BackToYou.</string>
 
     <!-- Auth screen (reference layout) -->
@@ -11,10 +11,42 @@
     <string name="auth_subtitle_login">TO CONTINUE</string>
     <string name="auth_title_signup">SIGN UP</string>
     <string name="auth_subtitle_signup">FOR YOUR ACCOUNT</string>
-    <string name="auth_log_in">LOG IN</string>
-    <string name="auth_sign_up">SIGN UP</string>
+    <string name="auth_log_in">Log In</string>
+    <string name="auth_sign_up">Sign UP</string>
     <string name="sign_in_progress">Signing in…</string>
     <string name="create_account_progress">Creating account…</string>
+
+    <string name="home_toolbar_title">PingUS</string>
+    <string name="home_heading">Lost in MPTP? Just Ping.</string>
+    <string name="home_subheading">Browse the items you lost or found in MPTP</string>
+    <string name="home_search_hint">Search items, locations...</string>
+    <string name="home_chip_all">All</string>
+    <string name="home_chip_lost">Lost</string>
+    <string name="home_chip_found">Found</string>
+    <string name="home_chip_hostel">Hostel</string>
+    <string name="home_chip_mine">Mine</string>
+    <string name="home_stat_active">Active</string>
+    <string name="home_stat_lost">Lost</string>
+    <string name="home_stat_found">Found</string>
+    <string name="home_recent_posts">Recent Posts</string>
+    <string name="home_empty_title">No items found</string>
+    <string name="home_empty_default">Try another filter or add a new post.</string>
+    <string name="home_empty_search">No results match your search. Try a different keyword.</string>
+    <string name="home_empty_lost">There are no lost item posts right now.</string>
+    <string name="home_empty_found">There are no found item posts right now.</string>
+    <string name="home_empty_hostel">No hostel related posts are available right now.</string>
+    <string name="home_empty_mine">"You haven't posted anything yet. Tap + to add your first post."</string>
+    <string name="profile_toolbar_title">Profile</string>
+    <string name="profile_section_label">Your account</string>
+    <string name="profile_details_label">Signup details</string>
+    <string name="profile_field_role">Role</string>
+    <string name="profile_field_id">Student/Staff ID</string>
+    <string name="profile_field_department">Department</string>
+    <string name="profile_field_phone">Phone number</string>
+    <string name="profile_guest_name">PingUS User</string>
+    <string name="profile_not_available">Not available</string>
+    <string name="profile_login_required">Please sign in to view your profile.</string>
+    <string name="profile_load_failed">Couldn\'t load profile details.</string>
 
     <!-- Sign In Section -->
     <string name="sign_in">Sign In</string>
@@ -22,19 +54,18 @@
     <string name="password">Password</string>
     <string name="keep_signed_in">Keep me signed in</string>
     <string name="forgot_password">Forgot Password?</string>
-    <string name="or_continue_with">Or continue with</string>
-    <string name="continue_with_sso">Continue with SSO</string>
     <string name="no_account">Don\'t have an account?</string>
 
     <!-- Create Account Section -->
     <string name="create_account">Create Account</string>
     <string name="personal_info">Personal Information</string>
     <string name="full_name">Full Name</string>
-    <string name="email_hint">Use your university domain (@nmims.edu.in)</string>
+    <string name="email_hint">Use your university domain (@nmims.in)</string>
     <string name="student_staff_id">Student/Staff ID</string>
     <string name="role">Role</string>
     <string name="department">Department</string>
     <string name="phone_number">Phone Number</string>
+    <string name="phone_whatsapp_hint">Preferred as WhatsApp number</string>
     <string name="phone_hint">Optional (for recovery)</string>
     <string name="set_password">Set Password</string>
     <string name="confirm_password">Confirm Password</string>

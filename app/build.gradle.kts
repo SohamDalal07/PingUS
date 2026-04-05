@@ -1,17 +1,18 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.gms.google-services")
+    // Fix: If this line causes an error, ensure it's defined in the Root build.gradle.kts
+    id("com.google.gms.google-services") 
 }
 
 android {
     namespace = "com.example.backtoyou"
-    compileSdk = 34
+    compileSdk = 36// Recommended: Use 34 or 35. 36 is still in preview.
 
     defaultConfig {
         applicationId = "com.example.backtoyou"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35 
         versionCode = 1
         versionName = "1.0"
 
@@ -40,9 +41,8 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
     lint {
-        disable.add("MissingConstraints")
-        disable.add("UseAppTint")
         abortOnError = false
     }
 }
@@ -52,16 +52,17 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-
-    // Firebase BOM
+    // Firebase BOM (Ensure this version is compatible with AGP 8.x)
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }
