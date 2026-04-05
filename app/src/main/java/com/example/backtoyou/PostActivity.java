@@ -9,6 +9,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,8 +29,10 @@ import java.util.Map;
 public class PostActivity extends AppCompatActivity {
 
     // ── Views ──
-    private Button   btnLost, btnFound, btnPostReport;
+    private Button   btnPostReport;
     private EditText etItemName, etDescription;
+    private RadioButton rbLost, rbFound;
+    private RadioGroup rgType;
     private Spinner  spinnerPersonal, spinnerAcademic, spinnerLocation;
     private TextView tvPersonalLabel, tvAcademicLabel;
 
@@ -62,11 +66,12 @@ public class PostActivity extends AppCompatActivity {
     // 1. Bind views
     // ─────────────────────────────────────────
     private void bindViews() {
-        btnLost         = findViewById(R.id.btnLost);
-        btnFound        = findViewById(R.id.btnFound);
         btnPostReport   = findViewById(R.id.btnPostReport);
         etItemName      = findViewById(R.id.etItemName);
         etDescription   = findViewById(R.id.etDescription);
+        rbLost          = findViewById(R.id.rb_lost);
+        rbFound         = findViewById(R.id.rb_found);
+        rgType          = findViewById(R.id.rg_type);
         spinnerPersonal = findViewById(R.id.spinnerPersonal);
         spinnerAcademic = findViewById(R.id.spinnerAcademic);
         spinnerLocation = findViewById(R.id.spinnerLocation);
@@ -96,23 +101,28 @@ public class PostActivity extends AppCompatActivity {
     // 3. Lost / Found toggle
     // ─────────────────────────────────────────
     private void setupToggle() {
-        btnLost.setOnClickListener(v  -> setType("LOST"));
-        btnFound.setOnClickListener(v -> setType("FOUND"));
-        setType("LOST"); // default
+        rgType.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rb_lost) {
+                setType("LOST");
+            } else if (checkedId == R.id.rb_found) {
+                setType("FOUND");
+            }
+        });
+        rgType.check(R.id.rb_lost);
     }
 
     private void setType(String type) {
         selectedType = type;
-        if (type.equals("LOST")) {
-            btnLost.setTextColor(ContextCompat.getColor(this, R.color.colorTextOnPrimary));
-            btnLost.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
-            btnFound.setTextColor(ContextCompat.getColor(this, R.color.colorTextSecondary));
-            btnFound.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        if ("LOST".equals(type)) {
+            rbLost.setTextColor(ContextCompat.getColor(this, R.color.white));
+            rbLost.setBackgroundResource(R.drawable.seg_lost);
+            rbFound.setTextColor(ContextCompat.getColor(this, R.color.home_hint_text));
+            rbFound.setBackgroundResource(R.drawable.seg_unselected);
         } else {
-            btnFound.setTextColor(ContextCompat.getColor(this, R.color.colorTextOnPrimary));
-            btnFound.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
-            btnLost.setTextColor(ContextCompat.getColor(this, R.color.colorTextSecondary));
-            btnLost.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+            rbFound.setTextColor(ContextCompat.getColor(this, R.color.white));
+            rbFound.setBackgroundResource(R.drawable.seg_found);
+            rbLost.setTextColor(ContextCompat.getColor(this, R.color.home_hint_text));
+            rbLost.setBackgroundResource(R.drawable.seg_unselected);
         }
     }
 

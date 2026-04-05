@@ -1,5 +1,6 @@
 package com.example.backtoyou;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
@@ -22,8 +23,6 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-
-import android.content.Intent;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,7 +37,7 @@ public class Login_page extends AppCompatActivity {
     private TextInputLayout emailLayoutSignIn, passwordLayoutSignIn;
     private CheckBox keepSignedIn;
     private TextView forgotPasswordLink, linkCreateAccount;
-    private MaterialButton btnSignIn, btnUniversitySso;
+    private MaterialButton btnSignIn;
     private FrameLayout signInForm, createAccountForm;
 
     private TextInputEditText fullName, emailSignUp, studentId, role, department, phone;
@@ -85,7 +84,6 @@ public class Login_page extends AppCompatActivity {
         keepSignedIn = findViewById(R.id.keep_signed_in);
         forgotPasswordLink = findViewById(R.id.forgot_password_link);
         btnSignIn = findViewById(R.id.btn_sign_in);
-        btnUniversitySso = findViewById(R.id.btn_university_sso);
         linkCreateAccount = findViewById(R.id.link_create_account);
 
         fullName = findViewById(R.id.fullname);
@@ -119,7 +117,6 @@ public class Login_page extends AppCompatActivity {
         pageDotRight.setOnClickListener(v -> switchToCreateAccount());
 
         btnSignIn.setOnClickListener(v -> handleSignIn());
-        btnUniversitySso.setOnClickListener(v -> handleSSO());
         forgotPasswordLink.setOnClickListener(v -> handleForgotPassword());
         linkCreateAccount.setOnClickListener(v -> switchToCreateAccount());
 
@@ -222,10 +219,6 @@ public class Login_page extends AppCompatActivity {
                         }
                     });
         }
-    }
-
-    private void handleSSO() {
-        Toast.makeText(this, "University SSO login coming soon", Toast.LENGTH_SHORT).show();
     }
 
     private void handleForgotPassword() {

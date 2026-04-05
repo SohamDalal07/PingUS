@@ -53,12 +53,42 @@
     <color name="colorChipUnselectedText">#757575</color>
 
     <!-- Auth / login screens (reference UI) -->
-    <color name="auth_login_screen_bg">#E8A0A8</color>
+    <color name="auth_login_screen_bg">#71D5E4</color>
     <color name="auth_signup_screen_bg">#F0F0F0</color>
     <color name="auth_pink_primary">#D85A6A</color>
     <color name="auth_pink_dark">#C4475A</color>
     <color name="auth_label_login">#CCFFFFFF</color>
+    <!-- WCAG-friendly on auth_login_screen_bg (~4.5:1 for small copy vs semi-transparent white) -->
+    <color name="auth_on_login_secondary">#5A2832</color>
     <color name="auth_label_signup">#99D85A6A</color>
     <color name="auth_dot_inactive_login">#66FFFFFF</color>
     <color name="auth_dot_inactive_signup">#40D85A6A</color>
+    <color name="auth_underline_login_idle">#E6FFFFFF</color>
+    <color name="home_page_bg">#F7F8FA</color>
+    <color name="home_primary_blue">#2563EB</color>
+    <color name="home_brand_blue">#185FA5</color>
+    <color name="home_title_text">#111827</color>
+    <color name="home_meta_text">#6B7280</color>
+    <color name="home_hint_text">#9CA3AF</color>
+    <color name="home_chip_unselected_text">#9CA3AF</color>
+    <color name="home_tab_active_bg">#DBEAFE</color>
+    <color name="home_tab_active_text">#1D4ED8</color>
+    <color name="home_card_stroke">#E5E7EB</color>
+    <color name="home_found_bg">#D1FAE5</color>
+    <color name="home_found_text">#065F46</color>
+    <color name="home_lost_bg">#FEE2E2</color>
+    <color name="home_lost_text">#991B1B</color>
+    <color name="home_claimed_bg">#EDE9FE</color>
+    <color name="home_claimed_text">#4C1D95</color>
+    <color name="profileBlue">#378ADD</color>
+    <color name="profileBlueDark">#185FA5</color>
+    <color name="profileBlueLight">#E6F1FB</color>
+    <color name="profileGreenLight">#EAF3DE</color>
+    <color name="profileGreenDark">#3B6D11</color>
+    <color name="profileAmberLight">#FAEEDA</color>
+    <color name="profileAmberDark">#854F0B</color>
+    <color name="profileRedLight">#FCEBEB</color>
+    <color name="profileRedBorder">#F09595</color>
+    <color name="profileRedDark">#A32D2D</color>
+    <color name="dividerColor">#E0E0E0</color>
 </resources>
