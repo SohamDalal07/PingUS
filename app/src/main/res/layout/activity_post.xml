@@ -181,27 +181,29 @@
             <LinearLayout
                 android:id="@+id/layoutPhotoTap"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="18dp"
-                android:clickable="true"
-                android:focusable="true">
+                android:layout_marginBottom="18dp">
+
+                <Button
+                    android:id="@+id/btnSelectImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="📷 Select Image"
+                    android:textColor="@color/colorTextOnPrimary"
+                    android:textSize="14sp"
+                    android:textAllCaps="false"
+                    android:layout_marginBottom="12dp"/>
 
                 <ImageView
-                    android:id="@+id/ivPhotoPreview"
+                    android:id="@+id/ivSelectedImage"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="180dp"
                     android:scaleType="centerCrop"
-                    android:visibility="gone"/>
-
-                <TextView
-                    android:id="@+id/tvPhotoHint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tap to add photo"
-                    android:textColor="@color/colorTextHint"
-                    android:textSize="13sp"/>
+                    android:visibility="gone"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/bg_seg_track"/>
 
             </LinearLayout>
 

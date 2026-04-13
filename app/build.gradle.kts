@@ -45,6 +45,19 @@ android {
     lint {
         abortOnError = false
     }
+
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/io.netty.versions.properties"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/proguard/androidx-*.pro"
+        }
+    }
 }
 
 dependencies {
@@ -61,6 +74,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

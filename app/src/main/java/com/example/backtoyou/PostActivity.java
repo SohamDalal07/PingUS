@@ -1,14 +1,20 @@
 package com.example.backtoyou;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -18,10 +24,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.app.ActivityCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +43,13 @@ public class PostActivity extends AppCompatActivity {
     private RadioGroup rgType;
     private Spinner  spinnerPersonal, spinnerAcademic, spinnerLocation;
     private TextView tvPersonalLabel, tvAcademicLabel;
+    private Button   btnSelectImage;
+    private ImageView ivSelectedImage;
+
+    // ── Firebase Storage (via ImageStorageConfig) ──
+    private StorageReference storageReference;
+    private Uri selectedImageUri;
+    private String uploadedImageUrl = "";
 
     // ── State ──
     private String selectedType     = "LOST";
@@ -60,6 +75,17 @@ public class PostActivity extends AppCompatActivity {
         setupToggle();
         setupSpinners();
         setupPostButton();
+        setupImagePicker();
+        
+        // Initialize SEPARATE Firebase Storage for Images
+        // Replace these with your image project credentials from Firebase Console
+        ImageStorageConfig.initializeImageStorage(
+            "your-image-project-id",          // Replace with Image Project ID
+            "YOUR-API-KEY",                   // Replace with Image Project API Key (AIzaSy...)
+            "1:123456789:android:abc123",     // Replace with Image Project App ID
+            "your-image-project.appspot.com"  // Replace with Image Storage Bucket
+        );
+        storageReference = ImageStorageConfig.getImageStorageReference();
     }
 
     // ─────────────────────────────────────────
@@ -77,6 +103,8 @@ public class PostActivity extends AppCompatActivity {
         spinnerLocation = findViewById(R.id.spinnerLocation);
         tvPersonalLabel = findViewById(R.id.tvPersonalLabel);
         tvAcademicLabel = findViewById(R.id.tvAcademicLabel);
+        btnSelectImage  = findViewById(R.id.btnSelectImage);
+        ivSelectedImage = findViewById(R.id.ivSelectedImage);
 
         // hint color set in Java — android:hintTextColor not valid on plain EditText in XML
         int hintColor = ContextCompat.getColor(this, R.color.colorTextHint);
@@ -222,6 +250,121 @@ public class PostActivity extends AppCompatActivity {
     }
 
     // ─────────────────────────────────────────
+    // 4. Image Picker Setup
+    // ─────────────────────────────────────────
+    private void setupImagePicker() {
+        btnSelectImage.setOnClickListener(v -> openGallery());
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            selectedImageUri = data.getData();
+            ivSelectedImage.setImageURI(selectedImageUri);
+            ivSelectedImage.setVisibility(View.VISIBLE);
+            uploadImageToFirebase(selectedImageUri);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, try upload again if we have an image
+                if (selectedImageUri != null) {
+                    uploadImageToFirebase(selectedImageUri);
+                }
+            } else {
+                Toast.makeText(this, "Storage permission denied. Cannot upload images.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void uploadImageToFirebase(Uri imageUri) {
+        if (imageUri == null) {
+            Toast.makeText(this, "No image selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if user is authenticated
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Please log in first", Toast.LENGTH_SHORT).show();
+            btnSelectImage.setText("Select Image");
+            return;
+        }
+
+        // Check if we have permission to read external storage
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Storage permission required", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
+            return;
+        }
+
+        btnSelectImage.setEnabled(false);
+        btnSelectImage.setText("Uploading...");
+
+        try {
+            // Create unique filename with timestamp and user ID
+            String filename = currentUser.getUid() + "_" + System.currentTimeMillis() + ".jpg";
+            StorageReference fileRef = storageReference.child(filename);
+
+            Log.d("Upload", "Starting upload for: " + filename);
+            Log.d("Upload", "Image URI: " + imageUri);
+            Log.d("Upload", "Storage Reference: " + fileRef.getPath());
+            Log.d("Upload", "User ID: " + currentUser.getUid());
+            Log.d("Upload", "User Email: " + currentUser.getEmail());
+
+            fileRef.putFile(imageUri)
+                    .addOnProgressListener(taskSnapshot -> {
+                        double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        Log.d("Upload", "Upload progress: " + progress + "%");
+                    })
+                    .addOnSuccessListener(taskSnapshot -> {
+                        Log.d("Upload", "Upload successful, getting download URL");
+                        // Get download URL after successful upload
+                        fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                            uploadedImageUrl = uri.toString();
+                            btnSelectImage.setEnabled(true);
+                            btnSelectImage.setText("✓ Image uploaded");
+                            Toast.makeText(PostActivity.this, "Image uploaded successfully!", Toast.LENGTH_SHORT).show();
+                            Log.i("Upload", "Image URL: " + uploadedImageUrl);
+                        }).addOnFailureListener(e -> {
+                            btnSelectImage.setEnabled(true);
+                            btnSelectImage.setText("Select Image");
+                            uploadedImageUrl = ""; // Reset on failure
+                            String errorMsg = "Failed to get image URL: " + e.getMessage();
+                            Toast.makeText(PostActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                            Log.e("Upload", errorMsg, e);
+                        });
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSelectImage.setEnabled(true);
+                        btnSelectImage.setText("Select Image");
+                        uploadedImageUrl = ""; // Reset on failure
+                        String errorMsg = "Upload failed: " + e.getMessage();
+                        Toast.makeText(PostActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        Log.e("Upload", errorMsg, e);
+                        e.printStackTrace();
+                    });
+        } catch (Exception e) {
+            btnSelectImage.setEnabled(true);
+            btnSelectImage.setText("Select Image");
+            uploadedImageUrl = "";
+            String errorMsg = "Error: " + e.getMessage();
+            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            Log.e("Upload", errorMsg, e);
+        }
+    }
+
+    // ─────────────────────────────────────────
     // 5. Post button → validate → security dialog
     // ─────────────────────────────────────────
     private void setupPostButton() {
@@ -339,14 +482,11 @@ public class PostActivity extends AppCompatActivity {
         item.put("status",        "ACTIVE");
         item.put("location",      selectedLocation);
         item.put("description",   description);
-//        item.put("postedByUid",   currentUser.getUid());
-//        item.put("postedByName",  currentUser.getDisplayName() != null
-//                ? currentUser.getDisplayName() : "Anonymous");
         item.put("postedByUid",  postedByUid);
         item.put("postedByName", postedByName);
         item.put("postedAt",      System.currentTimeMillis());
         item.put("expiresAt",     System.currentTimeMillis() + (14L * 24 * 60 * 60 * 1000));
-        item.put("photoUrl",      "");
+        item.put("photoUrl",      uploadedImageUrl);
 
         // security answers — private, never shown on feed
         item.put("securityColor", securityColor);
@@ -371,5 +511,11 @@ public class PostActivity extends AppCompatActivity {
                             "Failed: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Firebase Storage handles cleanup automatically
     }
 }
