@@ -88,7 +88,7 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseFirestore.getInstance()
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26")
                 .collection("users")
                 .document(user.getUid())
                 .get()
@@ -190,7 +190,7 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseFirestore.getInstance()
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26")
                 .collection("users")
                 .document(user.getUid())
                 .update("phone", updatedPhone);

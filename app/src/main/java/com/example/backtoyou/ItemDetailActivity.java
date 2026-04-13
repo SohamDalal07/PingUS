@@ -36,6 +36,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     private String posterEmail = "";
     private String posterPhone = "";
     private String currentUserId, posterUid, itemId;
+    private String itemPhotoUrl = ""; // poster's uploaded image, passed in to claim
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +80,8 @@ public class ItemDetailActivity extends AppCompatActivity {
         if (intent == null) return;
 
         itemId = intent.getStringExtra("itemId");
+        itemPhotoUrl = intent.getStringExtra("photoUrl");
+        if (itemPhotoUrl == null) itemPhotoUrl = "";
         String title = intent.getStringExtra("title");
         String type = intent.getStringExtra("type");
         String category = intent.getStringExtra("category");
@@ -133,7 +136,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         btnClaimItem.setEnabled(false);
         btnClaimItem.setText("Loading...");
 
-        FirebaseFirestore.getInstance().collection("claims")
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("claims")
             .whereEqualTo("itemId", itemId)
             .whereEqualTo("claimerUid", currentUserId)
             .get()
@@ -218,8 +221,9 @@ public class ItemDetailActivity extends AppCompatActivity {
         claimData.put("markAns", mark);
         claimData.put("status", "PENDING");
         claimData.put("timestamp", System.currentTimeMillis());
+        claimData.put("photoUrl", itemPhotoUrl); // include poster's item photo so alert card can show it
 
-        FirebaseFirestore.getInstance().collection("claims").add(claimData)
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("claims").add(claimData)
             .addOnSuccessListener(documentReference -> {
                 Toast.makeText(this, "Claim submitted securely!", Toast.LENGTH_LONG).show();
                 checkClaimStatus();
@@ -232,7 +236,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
 
     private void fetchContactInfo(String uid) {
-        FirebaseFirestore.getInstance().collection("users").document(uid).get()
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("users").document(uid).get()
             .addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     posterEmail = documentSnapshot.getString("email");

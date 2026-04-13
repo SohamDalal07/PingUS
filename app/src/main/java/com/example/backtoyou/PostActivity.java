@@ -45,6 +45,7 @@ public class PostActivity extends AppCompatActivity {
     private TextView tvPersonalLabel, tvAcademicLabel;
     private Button   btnSelectImage;
     private ImageView ivSelectedImage;
+    private android.widget.LinearLayout layoutImageSection;
 
     // ── Firebase Storage (via ImageStorageConfig) ──
     private StorageReference storageReference;
@@ -76,16 +77,8 @@ public class PostActivity extends AppCompatActivity {
         setupSpinners();
         setupPostButton();
         setupImagePicker();
-        
-        // Initialize SEPARATE Firebase Storage for Images
-        // Replace these with your image project credentials from Firebase Console
-        ImageStorageConfig.initializeImageStorage(
-            "your-image-project-id",          // Replace with Image Project ID
-            "YOUR-API-KEY",                   // Replace with Image Project API Key (AIzaSy...)
-            "1:123456789:android:abc123",     // Replace with Image Project App ID
-            "your-image-project.appspot.com"  // Replace with Image Storage Bucket
-        );
-        storageReference = ImageStorageConfig.getImageStorageReference();
+        // Initialize Firebase Storage using the default app (Project B)
+        storageReference = com.google.firebase.storage.FirebaseStorage.getInstance().getReference().child("images");
     }
 
     // ─────────────────────────────────────────
@@ -105,6 +98,7 @@ public class PostActivity extends AppCompatActivity {
         tvAcademicLabel = findViewById(R.id.tvAcademicLabel);
         btnSelectImage  = findViewById(R.id.btnSelectImage);
         ivSelectedImage = findViewById(R.id.ivSelectedImage);
+        layoutImageSection = findViewById(R.id.layoutImageSection);
 
         // hint color set in Java — android:hintTextColor not valid on plain EditText in XML
         int hintColor = ContextCompat.getColor(this, R.color.colorTextHint);
@@ -146,11 +140,19 @@ public class PostActivity extends AppCompatActivity {
             rbLost.setBackgroundResource(R.drawable.seg_lost);
             rbFound.setTextColor(ContextCompat.getColor(this, R.color.home_hint_text));
             rbFound.setBackgroundResource(R.drawable.seg_unselected);
+            // Show image upload only for LOST items
+            layoutImageSection.setVisibility(View.VISIBLE);
         } else {
             rbFound.setTextColor(ContextCompat.getColor(this, R.color.white));
             rbFound.setBackgroundResource(R.drawable.seg_found);
             rbLost.setTextColor(ContextCompat.getColor(this, R.color.home_hint_text));
             rbLost.setBackgroundResource(R.drawable.seg_unselected);
+            // Hide image upload for FOUND items and clear any chosen image
+            layoutImageSection.setVisibility(View.GONE);
+            uploadedImageUrl = "";
+            selectedImageUri = null;
+            ivSelectedImage.setVisibility(View.GONE);
+            btnSelectImage.setText("📷 Select Image");
         }
     }
 
@@ -301,12 +303,8 @@ public class PostActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if we have permission to read external storage
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Storage permission required", Toast.LENGTH_SHORT).show();
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 100);
-            return;
-        }
+        // Temporary URI read access is already granted by Android's ACTION_PICK intent.
+        // No READ_EXTERNAL_STORAGE permission check is needed here.
 
         btnSelectImage.setEnabled(false);
         btnSelectImage.setText("Uploading...");
@@ -461,16 +459,15 @@ public class PostActivity extends AppCompatActivity {
     private void postItem(String itemName) {
         String description = etDescription.getText().toString().trim();
 
-//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-//        if (currentUser == null) {
-//            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Not logged in! Please login first.", Toast.LENGTH_SHORT).show();
+            // Don't log a local success if we aren't logged in.
+            return;
+        }
 
-// TODO: remove this bypass when LoginActivity is built
-        String postedByUid  = currentUser != null ? currentUser.getUid()         : "test_user_001";
-        String postedByName = currentUser != null ? currentUser.getDisplayName() : "Test User";
+        String postedByUid  = currentUser.getUid();
+        String postedByName = currentUser.getDisplayName() != null ? currentUser.getDisplayName() : "Test User";
 
         btnPostReport.setEnabled(false);
         btnPostReport.setText("Posting…");
@@ -493,7 +490,7 @@ public class PostActivity extends AppCompatActivity {
         item.put("securityBrand", securityBrand);
         item.put("securityMark",  securityMark);
 
-        FirebaseFirestore.getInstance()
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26")
                 .collection("items")
                 .add(item)
                 .addOnSuccessListener(documentReference -> {

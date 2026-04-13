@@ -70,7 +70,7 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
         }
 
         // Listener 1: As Poster (All claims for history)
-        posterListenerReg = FirebaseFirestore.getInstance()
+        posterListenerReg = FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("posterUid", currentUserId)
                 .addSnapshotListener((value, error) -> {
@@ -86,7 +86,7 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
                 });
 
         // Listener 2: As Claimer (Checking for APPROVED claims)
-        claimerListenerReg = FirebaseFirestore.getInstance()
+        claimerListenerReg = FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("claimerUid", currentUserId)
                 .whereEqualTo("status", "APPROVED")
@@ -141,7 +141,7 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
     private void updateClaimStatus(DocumentSnapshot claimDoc, String newStatus) {
         String claimId = claimDoc.getId();
         
-        FirebaseFirestore.getInstance().collection("claims").document(claimId)
+        FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("claims").document(claimId)
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Claim " + newStatus.toLowerCase(), Toast.LENGTH_SHORT).show();
@@ -150,7 +150,7 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
                     if ("APPROVED".equals(newStatus)) {
                         String itemId = claimDoc.getString("itemId");
                         if (itemId != null) {
-                            FirebaseFirestore.getInstance().collection("items").document(itemId)
+                            FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("items").document(itemId)
                                 .update("type", "CLAIMED")
                                 .addOnFailureListener(e -> Log.e("AlertsActivity", "Failed to update item status", e));
                         }

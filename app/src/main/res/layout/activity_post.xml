@@ -169,41 +169,50 @@
 
             </LinearLayout>
 
-            <!-- ── Photo optional ── -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Photo (optional)"
-                android:textColor="@color/colorTextSecondary"
-                android:textSize="13sp"
-                android:layout_marginBottom="6dp"/>
-
+            <!-- ── Photo optional (LOST only) ── -->
             <LinearLayout
-                android:id="@+id/layoutPhotoTap"
+                android:id="@+id/layoutImageSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="center"
-                android:layout_marginBottom="18dp">
+                android:visibility="visible">
 
-                <Button
-                    android:id="@+id/btnSelectImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:text="📷 Select Image"
-                    android:textColor="@color/colorTextOnPrimary"
-                    android:textSize="14sp"
-                    android:textAllCaps="false"
-                    android:layout_marginBottom="12dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Photo (optional)"
+                    android:textColor="@color/colorTextSecondary"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="6dp"/>
 
-                <ImageView
-                    android:id="@+id/ivSelectedImage"
+                <LinearLayout
+                    android:id="@+id/layoutPhotoTap"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
-                    android:scaleType="centerCrop"
-                    android:visibility="gone"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/bg_seg_track"/>
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:layout_marginBottom="18dp">
+
+                    <Button
+                        android:id="@+id/btnSelectImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="📷 Select Image"
+                        android:textColor="@color/colorTextOnPrimary"
+                        android:textSize="14sp"
+                        android:textAllCaps="false"
+                        android:layout_marginBottom="12dp"/>
+
+                    <ImageView
+                        android:id="@+id/ivSelectedImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:layout_marginBottom="12dp"
+                        android:background="@drawable/bg_seg_track"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 

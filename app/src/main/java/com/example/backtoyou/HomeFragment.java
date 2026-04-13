@@ -100,6 +100,7 @@ public class HomeFragment extends Fragment {
             intent.putExtra("postedByName", getString(item, "postedByName"));
             intent.putExtra("postedByUid", getString(item, "postedByUid"));
             intent.putExtra("itemId", getString(item, "itemId"));
+            intent.putExtra("photoUrl", getString(item, "photoUrl"));
             
             Object postedAtObj = item.get("postedAt");
             if (postedAtObj instanceof Number) {
@@ -164,7 +165,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void listenToFeed() {
-        listenerReg = FirebaseFirestore.getInstance()
+        listenerReg = FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26")
                 .collection("items")
                 .whereEqualTo("status", "ACTIVE")
                 .orderBy("postedAt", Query.Direction.DESCENDING)

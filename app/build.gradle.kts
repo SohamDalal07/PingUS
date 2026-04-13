@@ -75,6 +75,9 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
 
+    // Image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

@@ -12,87 +12,126 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
+        <!-- Item photo — shown only when poster uploaded one -->
+        <ImageView
+            android:id="@+id/ivAlertItemPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:contentDescription="Item photo"/>
+
+        <!-- "Is this the item you found?" banner (visible with photo) -->
         <TextView
-            android:id="@+id/tvAlertItemTitle"
+            android:id="@+id/tvAlertPhotoQuestion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Item Title"
-            android:textSize="18sp"
+            android:text="Is this the item you found?"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimaryDark"/>
+            android:textColor="@color/white"
+            android:background="@color/colorPrimary"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center"
+            android:visibility="gone"/>
 
-        <TextView
-            android:id="@+id/tvAlertClaimerName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Claimed by: Username"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp"
-            android:textColor="@color/colorTextSecondary"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginVertical="12dp"
-            android:background="@android:color/darker_gray"
-            android:alpha="0.2"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Security Answers:"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp"/>
-
-        <TextView
-            android:id="@+id/tvAlertColor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Color: X"
-            android:textSize="14sp"
-            android:layout_marginBottom="2dp"/>
-        <TextView
-            android:id="@+id/tvAlertBrand"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Brand: Y"
-            android:textSize="14sp"
-            android:layout_marginBottom="2dp"/>
-        <TextView
-            android:id="@+id/tvAlertMark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mark: Z"
-            android:textSize="14sp"/>
-
+        <!-- Card body -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
-            android:gravity="end">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <Button
-                android:id="@+id/btnAlertReject"
+            <TextView
+                android:id="@+id/tvAlertItemTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Item Title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryDark"/>
+
+            <TextView
+                android:id="@+id/tvAlertClaimerName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Claimed by: Username"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/colorTextSecondary"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="@android:color/darker_gray"
+                android:alpha="0.2"/>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Reject"
-                android:textColor="@color/colorLostBg"
-                style="?android:attr/borderlessButtonStyle"/>
+                android:text="Security Answers:"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
 
-            <Button
-                android:id="@+id/btnAlertApprove"
+            <TextView
+                android:id="@+id/tvAlertColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="Approve"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/colorFoundBg"/>
+                android:text="Color: X"
+                android:textSize="14sp"
+                android:layout_marginBottom="2dp"/>
+
+            <TextView
+                android:id="@+id/tvAlertBrand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Brand: Y"
+                android:textSize="14sp"
+                android:layout_marginBottom="2dp"/>
+
+            <TextView
+                android:id="@+id/tvAlertMark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mark: Z"
+                android:textSize="14sp"/>
+
+            <!-- Accept / Reject buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:gravity="end">
+
+                <Button
+                    android:id="@+id/btnAlertReject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reject"
+                    android:textColor="@color/colorLostBg"
+                    style="?android:attr/borderlessButtonStyle"/>
+
+                <Button
+                    android:id="@+id/btnAlertApprove"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Approve"
+                    android:textColor="@color/white"
+                    android:backgroundTint="@color/colorFoundBg"/>
+
+            </LinearLayout>
         </LinearLayout>
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

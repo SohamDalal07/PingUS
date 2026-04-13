@@ -325,7 +325,7 @@ public class Login_page extends AppCompatActivity {
                                 userMap.put("phone", phone.getText().toString().trim());
                                 userMap.put("uid", uid);
 
-                                FirebaseFirestore.getInstance().collection("users")
+                                FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("users")
                                         .document(uid).set(userMap)
                                         .addOnCompleteListener(dbTask -> {
                                             btnCreateAccount.setEnabled(true);
