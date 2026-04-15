@@ -47,7 +47,8 @@ public class PostActivity extends AppCompatActivity {
     private ImageView ivSelectedImage;
     private android.widget.LinearLayout layoutImageSection;
 
-    // ── Firebase Storage (via ImageStorageConfig) ──
+    // ── Firebase Storage ──
+    private boolean isUploading = false; // guard: prevent posting while image upload is in progress
     private StorageReference storageReference;
     private Uri selectedImageUri;
     private String uploadedImageUrl = "";
@@ -306,6 +307,8 @@ public class PostActivity extends AppCompatActivity {
         // Temporary URI read access is already granted by Android's ACTION_PICK intent.
         // No READ_EXTERNAL_STORAGE permission check is needed here.
 
+        isUploading = true;
+        btnPostReport.setEnabled(false);  // block posting until upload finishes
         btnSelectImage.setEnabled(false);
         btnSelectImage.setText("Uploading...");
 
@@ -330,11 +333,15 @@ public class PostActivity extends AppCompatActivity {
                         // Get download URL after successful upload
                         fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
                             uploadedImageUrl = uri.toString();
+                            isUploading = false;
+                            btnPostReport.setEnabled(true);  // unlock Post button
                             btnSelectImage.setEnabled(true);
                             btnSelectImage.setText("✓ Image uploaded");
-                            Toast.makeText(PostActivity.this, "Image uploaded successfully!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(PostActivity.this, "Image uploaded! You can now post.", Toast.LENGTH_SHORT).show();
                             Log.i("Upload", "Image URL: " + uploadedImageUrl);
                         }).addOnFailureListener(e -> {
+                            isUploading = false;
+                            btnPostReport.setEnabled(true);  // unlock even on failure so user can still post without image
                             btnSelectImage.setEnabled(true);
                             btnSelectImage.setText("Select Image");
                             uploadedImageUrl = ""; // Reset on failure
@@ -344,6 +351,8 @@ public class PostActivity extends AppCompatActivity {
                         });
                     })
                     .addOnFailureListener(e -> {
+                        isUploading = false;
+                        btnPostReport.setEnabled(true);  // unlock so user can post without image
                         btnSelectImage.setEnabled(true);
                         btnSelectImage.setText("Select Image");
                         uploadedImageUrl = ""; // Reset on failure
@@ -353,6 +362,8 @@ public class PostActivity extends AppCompatActivity {
                         e.printStackTrace();
                     });
         } catch (Exception e) {
+            isUploading = false;
+            btnPostReport.setEnabled(true);
             btnSelectImage.setEnabled(true);
             btnSelectImage.setText("Select Image");
             uploadedImageUrl = "";
@@ -370,6 +381,11 @@ public class PostActivity extends AppCompatActivity {
     }
 
     private void validateAndShowSecurityDialog() {
+        // Safety guard: if upload still running, block post
+        if (isUploading) {
+            Toast.makeText(this, "Please wait — image is still uploading...", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String itemName = etItemName.getText().toString().trim();
 
         if (TextUtils.isEmpty(itemName)) {
@@ -513,6 +529,5 @@ public class PostActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Firebase Storage handles cleanup automatically
     }
 }
