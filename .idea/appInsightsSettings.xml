@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.backtoyou" />
-                  <option name="mobileSdkAppId" value="1:180535569534:android:8b187b78647e5ee7ec3c2f" />
-                  <option name="projectId" value="app-nmims-shirpur" />
-                  <option name="projectNumber" value="180535569534" />
+                  <option name="mobileSdkAppId" value="1:597162954439:android:3c6d0dece58e42624f38e2" />
+                  <option name="projectId" value="lost-and-found-d2ff9" />
+                  <option name="projectNumber" value="597162954439" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

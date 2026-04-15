@@ -2,8 +2,8 @@ package com.example.backtoyou;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -37,7 +37,16 @@ public class ProfileActivity extends AppCompatActivity {
             return insets;
         });
 
-        currentProfile = new UserProfile("", "", "", "", "", "", 0, 0);
+        currentProfile = new UserProfile(
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                0,
+                0
+        );
         loadUserProfile();
         setupClicks();
         setupBottomNavigation();
@@ -47,6 +56,8 @@ public class ProfileActivity extends AppCompatActivity {
         binding.tvAvatarInitial.setText(extractInitial(userProfile.getName()));
         binding.tvProfileName.setText(userProfile.getName());
         binding.tvProfileEmail.setText(userProfile.getEmail());
+        binding.chipRole.setText(userProfile.getRole());
+        binding.chipId.setText(userProfile.getStudentId());
         binding.tvPostsCount.setText(String.valueOf(userProfile.getPostsCount()));
         binding.tvAlertsCount.setText(String.valueOf(userProfile.getAlertsCount()));
         binding.tvDeptCode.setText(userProfile.getDepartmentShortCode());
@@ -57,7 +68,16 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupClicks() {
+        binding.btnEditProfile.setOnClickListener(v ->
+                Toast.makeText(this, "Edit profile coming soon", Toast.LENGTH_SHORT).show());
+
         binding.btnSignOut.setOnClickListener(v -> showSignOutDialog());
+
+        binding.actionSearch.setOnClickListener(v ->
+                startActivity(new Intent(this, Home.class)));
+        binding.actionNotifications.setOnClickListener(v ->
+                startActivity(new Intent(this, AlertsActivity.class)));
+        binding.actionMore.setOnClickListener(v -> showMoreMenu());
         binding.ivPhoneEdit.setOnClickListener(v -> showPhoneEditDialog());
     }
 
@@ -97,26 +117,37 @@ public class ProfileActivity extends AppCompatActivity {
         binding.bottomNavigation.setSelectedItemId(R.id.navigation_profile);
         binding.bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
+            Intent intent;
+
             if (itemId == R.id.navigation_home) {
-                startActivity(new Intent(this, Home.class));
+                intent = new Intent(this, Home.class);
             } else if (itemId == R.id.navigation_post) {
-                startActivity(new Intent(this, PostActivity.class));
+                intent = new Intent(this, PostActivity.class);
             } else if (itemId == R.id.navigation_alerts) {
-                startActivity(new Intent(this, AlertsActivity.class));
+                intent = new Intent(this, AlertsActivity.class);
             } else if (itemId == R.id.navigation_profile) {
                 return true;
+            } else {
+                return false;
             }
+
+            startActivity(intent);
             return true;
         });
     }
 
     private String extractInitial(String name) {
-        if (name == null || name.trim().isEmpty()) return "U";
+        if (name == null || name.trim().isEmpty()) {
+            return "P";
+        }
         return String.valueOf(Character.toUpperCase(name.trim().charAt(0)));
     }
 
     private String valueOrFallback(String value, String fallback) {
-        return (value == null || value.trim().isEmpty()) ? fallback : value.trim();
+        if (value == null || value.trim().isEmpty()) {
+            return fallback;
+        }
+        return value.trim();
     }
 
     private void showPhoneEditDialog() {
@@ -124,6 +155,8 @@ public class ProfileActivity extends AppCompatActivity {
         phoneInput.setText(binding.tvPhoneValue.getText());
         phoneInput.setHint("Enter phone number");
         phoneInput.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        phoneInput.setPadding(padding, padding, padding, padding);
 
         new AlertDialog.Builder(this)
                 .setTitle("Change phone number")
@@ -131,27 +164,55 @@ public class ProfileActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Save", (dialog, which) -> {
                     String updatedPhone = phoneInput.getText().toString().trim();
-                    if (updatedPhone.isEmpty()) updatedPhone = "Not available";
+                    if (updatedPhone.isEmpty()) {
+                        updatedPhone = "Not available";
+                    }
                     binding.tvPhoneValue.setText(updatedPhone);
+                    currentProfile = new UserProfile(
+                            currentProfile.getName(),
+                            currentProfile.getEmail(),
+                            currentProfile.getRole(),
+                            currentProfile.getStudentId(),
+                            currentProfile.getDepartment(),
+                            updatedPhone,
+                            currentProfile.getPostsCount(),
+                            currentProfile.getAlertsCount()
+                    );
                     persistPhoneNumber(updatedPhone);
+                    Toast.makeText(this, "Phone number updated", Toast.LENGTH_SHORT).show();
                 })
                 .show();
     }
 
     private void persistPhoneNumber(String updatedPhone) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            FirebaseFirestore.getInstance()
-                    .collection("users")
-                    .document(user.getUid())
-                    .update("phone", updatedPhone);
+        if (user == null) {
+            return;
         }
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(user.getUid())
+                .update("phone", updatedPhone);
+    }
+
+    private void showMoreMenu() {
+        PopupMenu popupMenu = new PopupMenu(this, binding.actionMore);
+        popupMenu.getMenu().add(0, 1, 0, "Sign out");
+        popupMenu.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                showSignOutDialog();
+                return true;
+            }
+            return false;
+        });
+        popupMenu.show();
     }
 
     private void showSignOutDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Sign out")
-                .setMessage("Are you sure?")
+                .setMessage("Are you sure you want to sign out?")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Sign out", (dialog, which) -> signOutAndGoToLogin())
                 .show();

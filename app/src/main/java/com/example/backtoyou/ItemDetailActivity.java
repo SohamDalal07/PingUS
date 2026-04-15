@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,10 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.ImageViewCompat;
-import androidx.core.widget.NestedScrollView;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,19 +29,13 @@ import java.util.concurrent.TimeUnit;
 public class ItemDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvStatus, tvCategory, tvLocationTime, tvDescription, tvPoster;
-    private MaterialButton btnContactCall, btnContactEmail, btnContactWhatsapp;
+    private ImageButton btnContactCall, btnContactEmail, btnContactWhatsapp;
     private LinearLayout layoutContactButtons, layoutClaimItem;
-    private MaterialButton btnClaimItem;
-    private TextView tvClaimStatusHint;
-    private ImageView ivDetailImage;
-    private NestedScrollView nestedScrollDetail;
-    private View layoutBottomActions;
+    private Button btnClaimItem;
 
     private String posterEmail = "";
     private String posterPhone = "";
     private String currentUserId, posterUid, itemId;
-    /** Item category from Firestore (also stored on new claims as itemCategory). */
-    private String itemCategory = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,14 +58,10 @@ public class ItemDetailActivity extends AppCompatActivity {
         layoutContactButtons = findViewById(R.id.layoutContactButtons);
         layoutClaimItem = findViewById(R.id.layoutClaimItem);
         btnClaimItem = findViewById(R.id.btnClaimItem);
-        tvClaimStatusHint = findViewById(R.id.tvClaimStatusHint);
 
         btnContactCall = findViewById(R.id.btnContactCall);
         btnContactEmail = findViewById(R.id.btnContactEmail);
         btnContactWhatsapp = findViewById(R.id.btnContactWhatsapp);
-        ivDetailImage = findViewById(R.id.ivDetailImage);
-        nestedScrollDetail = findViewById(R.id.nestedScrollDetail);
-        layoutBottomActions = findViewById(R.id.layoutBottomActions);
     }
 
     private void setupToolbar() {
@@ -116,16 +103,8 @@ public class ItemDetailActivity extends AppCompatActivity {
             }
         }
         
-        itemCategory = category != null ? category : "";
-        tvCategory.setText(!itemCategory.isEmpty() ? itemCategory : "Unspecified");
-
-        if (ivDetailImage != null) {
-            int hero = CategoryDrawableHelper.drawableResForCategory(
-                    itemCategory, R.drawable.electronics);
-            ivDetailImage.setImageResource(hero);
-            ImageViewCompat.setImageTintList(ivDetailImage, null);
-        }
-
+        tvCategory.setText(category != null && !category.isEmpty() ? category : "Other");
+        
         String timeStr = getTimeAgo(postedAt);
         tvLocationTime.setText((location != null ? location : "Unknown Location") + " · " + timeStr);
         
@@ -136,60 +115,23 @@ public class ItemDetailActivity extends AppCompatActivity {
         currentUserId = user != null ? user.getUid() : "test_user_001";
         
         if (currentUserId.equals(posterUid)) {
-            // Owner viewing own listing: no contact shortcuts here (claim flow is for other users).
-            layoutContactButtons.setVisibility(View.GONE);
+            layoutContactButtons.setVisibility(View.VISIBLE);
             layoutClaimItem.setVisibility(View.GONE);
-            if (tvClaimStatusHint != null) {
-                tvClaimStatusHint.setVisibility(View.GONE);
+            if (posterUid != null) {
+                fetchContactInfo(posterUid);
             }
-            if (layoutBottomActions != null) {
-                layoutBottomActions.setVisibility(View.GONE);
-            }
+            setupContactClickListeners();
         } else {
-            // Other user: claim → security questions (dialog) → pending message until poster acts.
             layoutContactButtons.setVisibility(View.GONE);
             layoutClaimItem.setVisibility(View.VISIBLE);
-            if (tvClaimStatusHint != null) {
-                tvClaimStatusHint.setVisibility(View.VISIBLE);
-                tvClaimStatusHint.setText("Tap Claim and answer the security questions. The poster will review your request.");
-            }
             checkClaimStatus();
-            if (layoutBottomActions != null) {
-                layoutBottomActions.setVisibility(View.VISIBLE);
-            }
         }
-
-        setupHeroImageScrollToActions();
-    }
-
-    /** Tap header image to scroll down to contact / claim actions. */
-    private void setupHeroImageScrollToActions() {
-        if (ivDetailImage == null || nestedScrollDetail == null) return;
-        ivDetailImage.setClickable(true);
-        ivDetailImage.setFocusable(true);
-        ivDetailImage.setOnClickListener(v -> {
-            nestedScrollDetail.post(() -> {
-                if (layoutBottomActions != null) {
-                    int[] loc = new int[2];
-                    layoutBottomActions.getLocationOnScreen(loc);
-                    int[] scrollLoc = new int[2];
-                    nestedScrollDetail.getLocationOnScreen(scrollLoc);
-                    int dy = loc[1] - scrollLoc[1] - nestedScrollDetail.getPaddingTop();
-                    nestedScrollDetail.smoothScrollBy(0, Math.max(0, dy));
-                } else {
-                    nestedScrollDetail.fullScroll(View.FOCUS_DOWN);
-                }
-            });
-        });
     }
 
     private void checkClaimStatus() {
         if (itemId == null || currentUserId == null) return;
         btnClaimItem.setEnabled(false);
         btnClaimItem.setText("Loading...");
-        if (tvClaimStatusHint != null) {
-            tvClaimStatusHint.setText("Checking your claim status…");
-        }
 
         FirebaseFirestore.getInstance().collection("claims")
             .whereEqualTo("itemId", itemId)
@@ -198,49 +140,29 @@ public class ItemDetailActivity extends AppCompatActivity {
             .addOnSuccessListener(queryDocumentSnapshots -> {
                 if (queryDocumentSnapshots.isEmpty()) {
                     btnClaimItem.setEnabled(true);
-                    btnClaimItem.setText("Claim this item");
+                    btnClaimItem.setText("Claim Item");
                     btnClaimItem.setOnClickListener(v -> showClaimDialog());
-                    if (tvClaimStatusHint != null) {
-                        tvClaimStatusHint.setVisibility(View.VISIBLE);
-                        tvClaimStatusHint.setText("Tap Claim and answer the security questions. The poster will review your request.");
-                    }
                 } else {
                     DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
                     String status = doc.getString("status");
                     if ("PENDING".equals(status)) {
                         btnClaimItem.setEnabled(false);
-                        btnClaimItem.setText("Request pending");
-                        if (tvClaimStatusHint != null) {
-                            tvClaimStatusHint.setVisibility(View.VISIBLE);
-                            tvClaimStatusHint.setText("Pending request sent. Waiting for the poster to approve or reject your claim.");
-                        }
+                        btnClaimItem.setText("Claim Pending Approval...");
                     } else if ("APPROVED".equals(status)) {
                         layoutClaimItem.setVisibility(View.GONE);
                         layoutContactButtons.setVisibility(View.VISIBLE);
-                        if (layoutBottomActions != null) {
-                            layoutBottomActions.setVisibility(View.VISIBLE);
-                        }
-                        if (posterUid != null) {
-                            fetchContactInfo(posterUid);
-                        }
+                        fetchContactInfo(posterUid);
                         setupContactClickListeners();
                     } else if ("REJECTED".equals(status)) {
                         btnClaimItem.setEnabled(false);
-                        btnClaimItem.setText("Request rejected");
-                        if (tvClaimStatusHint != null) {
-                            tvClaimStatusHint.setVisibility(View.VISIBLE);
-                            tvClaimStatusHint.setText("The poster did not approve this claim. You cannot claim this item again from here.");
-                        }
+                        btnClaimItem.setText("Claim Rejected by Poster");
                     }
                 }
             })
             .addOnFailureListener(e -> {
                 btnClaimItem.setEnabled(true);
-                btnClaimItem.setText("Retry");
+                btnClaimItem.setText("Error. Tap to retry");
                 btnClaimItem.setOnClickListener(v -> checkClaimStatus());
-                if (tvClaimStatusHint != null) {
-                    tvClaimStatusHint.setText("Could not load claim status. Tap Retry.");
-                }
             });
     }
 
@@ -275,11 +197,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private void submitClaim(String color, String brand, String mark) {
         btnClaimItem.setEnabled(false);
-        btnClaimItem.setText("Sending request…");
-        if (tvClaimStatusHint != null) {
-            tvClaimStatusHint.setVisibility(View.VISIBLE);
-            tvClaimStatusHint.setText("Sending your claim request…");
-        }
+        btnClaimItem.setText("Submitting...");
 
         String claimerName = "Unknown User";
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -292,7 +210,6 @@ public class ItemDetailActivity extends AppCompatActivity {
         Map<String, Object> claimData = new HashMap<>();
         claimData.put("itemId", itemId);
         claimData.put("itemTitle", tvTitle.getText().toString());
-        claimData.put("itemCategory", itemCategory);
         claimData.put("claimerUid", currentUserId);
         claimData.put("claimerName", claimerName);
         claimData.put("posterUid", posterUid);
@@ -304,11 +221,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         FirebaseFirestore.getInstance().collection("claims").add(claimData)
             .addOnSuccessListener(documentReference -> {
-                Toast.makeText(this, "Pending request sent. The poster will be notified.", Toast.LENGTH_LONG).show();
-                if (tvClaimStatusHint != null) {
-                    tvClaimStatusHint.setVisibility(View.VISIBLE);
-                    tvClaimStatusHint.setText("Pending request sent. Waiting for the poster to approve or reject your claim.");
-                }
+                Toast.makeText(this, "Claim submitted securely!", Toast.LENGTH_LONG).show();
                 checkClaimStatus();
             })
             .addOnFailureListener(e -> {

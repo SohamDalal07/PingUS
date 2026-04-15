@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "180535569534",
-    "project_id": "app-nmims-shirpur",
-    "storage_bucket": "app-nmims-shirpur.firebasestorage.app"
+    "project_number": "597162954439",
+    "project_id": "lost-and-found-d2ff9",
+    "storage_bucket": "lost-and-found-d2ff9.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:180535569534:android:8b187b78647e5ee7ec3c2f",
+        "mobilesdk_app_id": "1:597162954439:android:3c6d0dece58e42624f38e2",
         "android_client_info": {
           "package_name": "com.example.backtoyou"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBUPmNY6aQzJ97KvJkwtZtpdym_-i6ehUY"
+          "current_key": "AIzaSyDp8l1RfvatBNaQdARwSyBhl0yZqDpJQzA"
         }
       ],
       "services": {
