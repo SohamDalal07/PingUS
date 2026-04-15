@@ -15,6 +15,15 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <ImageView
+            android:id="@+id/ivAlertItemPhoto"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop"
+            android:src="@drawable/electronics" />
+
         <TextView
             android:id="@+id/tvAlertItemTitle"
             android:layout_width="match_parent"
@@ -74,7 +83,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="16dp"
-            android:gravity="end">
+            android:gravity="end"
+            android:visibility="gone">
 
             <Button
                 android:id="@+id/btnAlertReject"

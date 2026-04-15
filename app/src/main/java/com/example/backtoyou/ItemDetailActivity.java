@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +16,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -29,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class ItemDetailActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvStatus, tvCategory, tvLocationTime, tvDescription, tvPoster;
-    private ImageButton btnContactCall, btnContactEmail, btnContactWhatsapp;
+    private MaterialButton btnContactCall, btnContactEmail, btnContactWhatsapp;
     private LinearLayout layoutContactButtons, layoutClaimItem;
     private Button btnClaimItem;
 
@@ -133,7 +134,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         btnClaimItem.setEnabled(false);
         btnClaimItem.setText("Loading...");
 
-        FirebaseFirestore.getInstance().collection("claims")
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("claims")
             .whereEqualTo("itemId", itemId)
             .whereEqualTo("claimerUid", currentUserId)
             .get()
@@ -219,7 +220,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         claimData.put("status", "PENDING");
         claimData.put("timestamp", System.currentTimeMillis());
 
-        FirebaseFirestore.getInstance().collection("claims").add(claimData)
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("claims").add(claimData)
             .addOnSuccessListener(documentReference -> {
                 Toast.makeText(this, "Claim submitted securely!", Toast.LENGTH_LONG).show();
                 checkClaimStatus();
@@ -232,7 +233,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
 
     private void fetchContactInfo(String uid) {
-        FirebaseFirestore.getInstance().collection("users").document(uid).get()
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("users").document(uid).get()
             .addOnSuccessListener(documentSnapshot -> {
                 if (documentSnapshot.exists()) {
                     posterEmail = documentSnapshot.getString("email");

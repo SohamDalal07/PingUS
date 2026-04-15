@@ -1,14 +1,21 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow authenticated users to upload and download images
+    // Lost report image uploads from PostActivity ("I Lost It" flow)
+    match /lost_reports/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.resource.size < 10 * 1024 * 1024; // 10MB
+      allow delete: if request.auth != null;
+    }
+
+    // Legacy path support (if any previous uploads used item-images/)
     match /item-images/{allPaths=**} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.resource.size < 10 * 1024 * 1024; // 10MB limit
       allow delete: if request.auth != null;
     }
 
-    // Allow public read for download URLs (if needed)
+    // Keep auth-only fallback for any other path in this bucket.
     match /{allPaths=**} {
       allow read: if request.auth != null;
       allow write: if request.auth != null;

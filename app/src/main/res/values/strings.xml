@@ -99,4 +99,41 @@
         <item>Bags &amp; Clothing</item>
         <item>Personal &amp; Others</item>
     </string-array>
+
+    <!-- Legacy aliases kept for PostActivity merge-compatibility -->
+    <string-array name="categories_personal">
+        <item>Select Category</item>
+        <item>Electronics</item>
+        <item>Cards &amp; Documents</item>
+        <item>Stationery &amp; Books</item>
+        <item>Keys &amp; Access</item>
+        <item>Bags &amp; Clothing</item>
+        <item>Personal &amp; Others</item>
+    </string-array>
+
+    <string-array name="categories_academic">
+        <item>Select Category</item>
+        <item>Electronics</item>
+        <item>Cards &amp; Documents</item>
+        <item>Stationery &amp; Books</item>
+        <item>Keys &amp; Access</item>
+        <item>Bags &amp; Clothing</item>
+        <item>Personal &amp; Others</item>
+    </string-array>
+
+    <string-array name="locations_shirpur">
+        <item>Select Location</item>
+        <item>Boys Hostel</item>
+        <item>Girls Hostel</item>
+        <item>A Wing</item>
+        <item>B Wing</item>
+        <item>C Wing</item>
+        <item>D Wing</item>
+        <item>CF Canteen</item>
+        <item>Mess</item>
+        <item>Gymnasium</item>
+        <item>Cricket Ground</item>
+        <item>Football Ground</item>
+        <item>Library</item>
+    </string-array>
 </resources>

@@ -1,54 +1,51 @@
 package com.example.backtoyou;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 
+import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PostActivity extends AppCompatActivity {
 
-    // ── Views ──
-    private Button   btnPostReport;
+    private Button btnPostReport;
     private EditText etItemName, etDescription;
-    private RadioButton rbLost, rbFound;
-    private RadioGroup rgType;
-    private Spinner  spinnerPersonal, spinnerAcademic, spinnerLocation;
-    private TextView tvPersonalLabel, tvAcademicLabel;
+    private Spinner spinnerLocation, spinnerCategory;
+    private LinearLayout layoutFound, layoutLost, layoutPhotoTap;
+    private ImageView ivPhotoPreview;
+    private BottomNavigationView bottomNavigation;
 
-    // ── State ──
-    private String selectedType     = "LOST";
-    private String selectedCategory = "";
-    private String selectedLocation = "";
-
-    // which spinner was actively chosen by user
-    private boolean personalTouched = false;
-    private boolean academicTouched = false;
-
-    // security question answers — stored privately, never shown on feed
-    private String securityColor = "";
-    private String securityBrand = "";
-    private String securityMark  = "";
+    private String selectedType = "FOUND";
+    private String securityColor = "", securityBrand = "", securityMark = "";
+    private Uri selectedImageUri;
+    private ActivityResultLauncher<String> pickImageLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,319 +54,251 @@ public class PostActivity extends AppCompatActivity {
 
         bindViews();
         setupToolbar();
-        setupToggle();
+        setupTypeSelectors();
         setupSpinners();
+        setupPhotoPicker();
         setupPostButton();
+        setupBottomNavigation();
     }
 
-    // ─────────────────────────────────────────
-    // 1. Bind views
-    // ─────────────────────────────────────────
     private void bindViews() {
-        btnPostReport   = findViewById(R.id.btnPostReport);
-        etItemName      = findViewById(R.id.etItemName);
-        etDescription   = findViewById(R.id.etDescription);
-        rbLost          = findViewById(R.id.rb_lost);
-        rbFound         = findViewById(R.id.rb_found);
-        rgType          = findViewById(R.id.rg_type);
-        spinnerPersonal = findViewById(R.id.spinnerPersonal);
-        spinnerAcademic = findViewById(R.id.spinnerAcademic);
+        btnPostReport = findViewById(R.id.btnPostReport);
+        etItemName = findViewById(R.id.etItemName);
+        etDescription = findViewById(R.id.etDescription);
         spinnerLocation = findViewById(R.id.spinnerLocation);
-        tvPersonalLabel = findViewById(R.id.tvPersonalLabel);
-        tvAcademicLabel = findViewById(R.id.tvAcademicLabel);
-
-        // hint color set in Java — android:hintTextColor not valid on plain EditText in XML
-        int hintColor = ContextCompat.getColor(this, R.color.colorTextHint);
-        etItemName.setHintTextColor(hintColor);
-        etDescription.setHintTextColor(hintColor);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
+        layoutFound = findViewById(R.id.layoutFound);
+        layoutLost = findViewById(R.id.layoutLost);
+        layoutPhotoTap = findViewById(R.id.layoutPhotoTap);
+        ivPhotoPreview = findViewById(R.id.ivPhotoPreview);
+        bottomNavigation = findViewById(R.id.bottom_navigation);
     }
 
-    // ─────────────────────────────────────────
-    // 2. Toolbar
-    // ─────────────────────────────────────────
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Report an Item");
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_back_black);
         }
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
-    // ─────────────────────────────────────────
-    // 3. Lost / Found toggle
-    // ─────────────────────────────────────────
-    private void setupToggle() {
-        rgType.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rb_lost) {
-                setType("LOST");
-            } else if (checkedId == R.id.rb_found) {
-                setType("FOUND");
-            }
+    private void setupTypeSelectors() {
+        layoutLost.setOnClickListener(v -> {
+            selectedType = "LOST";
+            layoutLost.setBackgroundResource(R.drawable.bg_post_type_lost);
+            layoutFound.setBackgroundResource(R.drawable.bg_home_stat_card);
+            updatePhotoSectionForType();
         });
-        rgType.check(R.id.rb_lost);
+
+        layoutFound.setOnClickListener(v -> {
+            selectedType = "FOUND";
+            layoutFound.setBackgroundResource(R.drawable.bg_post_type_found);
+            layoutLost.setBackgroundResource(R.drawable.bg_home_stat_card);
+            updatePhotoSectionForType();
+        });
+        
+        layoutFound.performClick();
     }
 
-    private void setType(String type) {
-        selectedType = type;
-        if ("LOST".equals(type)) {
-            rbLost.setTextColor(ContextCompat.getColor(this, R.color.white));
-            rbLost.setBackgroundResource(R.drawable.seg_lost);
-            rbFound.setTextColor(ContextCompat.getColor(this, R.color.home_hint_text));
-            rbFound.setBackgroundResource(R.drawable.seg_unselected);
-        } else {
-            rbFound.setTextColor(ContextCompat.getColor(this, R.color.white));
-            rbFound.setBackgroundResource(R.drawable.seg_found);
-            rbLost.setTextColor(ContextCompat.getColor(this, R.color.home_hint_text));
-            rbLost.setBackgroundResource(R.drawable.seg_unselected);
+    private void setupPhotoPicker() {
+        pickImageLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+            if (uri == null) return;
+            selectedImageUri = uri;
+            if (ivPhotoPreview != null) {
+                ivPhotoPreview.setVisibility(View.VISIBLE);
+                Glide.with(this).load(uri).centerCrop().into(ivPhotoPreview);
+            }
+        });
+
+        if (layoutPhotoTap != null) {
+            layoutPhotoTap.setOnClickListener(v -> {
+                if (!"LOST".equals(selectedType)) {
+                    Toast.makeText(this, "Image upload is available only for 'I Lost It'.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (pickImageLauncher != null) pickImageLauncher.launch("image/*");
+            });
         }
     }
 
-    // ─────────────────────────────────────────
-    // 4. Spinners with mutual exclusion
-    // ─────────────────────────────────────────
+    private void updatePhotoSectionForType() {
+        if (layoutPhotoTap == null) return;
+        boolean showPhotoSection = "LOST".equals(selectedType);
+        layoutPhotoTap.setVisibility(showPhotoSection ? View.VISIBLE : View.GONE);
+        if (!showPhotoSection) {
+            selectedImageUri = null;
+            if (ivPhotoPreview != null) {
+                ivPhotoPreview.setImageDrawable(null);
+                ivPhotoPreview.setVisibility(View.GONE);
+            }
+        }
+    }
+
     private void setupSpinners() {
+        String[] locations = getResources().getStringArray(R.array.locations_campus);
+        ArrayAdapter<String> locAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, locations);
+        locAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerLocation.setAdapter(locAdapter);
 
-        String[] personal  = getResources().getStringArray(R.array.categories_personal);
-        String[] academic  = getResources().getStringArray(R.array.categories_academic);
-        String[] locations = getResources().getStringArray(R.array.locations_shirpur);
-
-        // ── Personal spinner ──
-        ArrayAdapter<String> adapterPersonal = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, personal);
-        adapterPersonal.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPersonal.setAdapter(adapterPersonal);
-        spinnerPersonal.setSelection(0, false);
-
-        spinnerPersonal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                if (!personalTouched) return;
-                if (position == 0) {
-                    selectedCategory = "";
-                    enableSpinner(spinnerAcademic, tvAcademicLabel, true);
-                } else {
-                    selectedCategory = personal[position];
-                    spinnerAcademic.setSelection(0, true);
-                    academicTouched = false;
-                    enableSpinner(spinnerAcademic, tvAcademicLabel, false);
-                }
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        spinnerPersonal.setOnTouchListener((v, event) -> {
-            personalTouched = true;
-            v.performClick();
-            return false;
-        });
-
-        // ── Academic spinner ──
-        ArrayAdapter<String> adapterAcademic = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, academic);
-        adapterAcademic.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerAcademic.setAdapter(adapterAcademic);
-        spinnerAcademic.setSelection(0, false);
-
-        spinnerAcademic.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                if (!academicTouched) return;
-                if (position == 0) {
-                    selectedCategory = "";
-                    enableSpinner(spinnerPersonal, tvPersonalLabel, true);
-                } else {
-                    selectedCategory = academic[position];
-                    spinnerPersonal.setSelection(0, true);
-                    personalTouched = false;
-                    enableSpinner(spinnerPersonal, tvPersonalLabel, false);
-                }
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
-
-        spinnerAcademic.setOnTouchListener((v, event) -> {
-            academicTouched = true;
-            v.performClick();
-            return false;
-        });
-
-        // ── Location spinner ──
-        ArrayAdapter<String> adapterLocation = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, locations);
-        adapterLocation.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerLocation.setAdapter(adapterLocation);
-        spinnerLocation.setSelection(0, false);
-
-        spinnerLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int position, long id) {
-                selectedLocation = (position == 0) ? "" : locations[position];
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        String[] categories = getResources().getStringArray(R.array.categories_items);
+        ArrayAdapter<String> catAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(catAdapter);
     }
 
-    // enable or disable a spinner + its label visually
-    private void enableSpinner(Spinner spinner, TextView label, boolean enable) {
-        spinner.setEnabled(enable);
-        spinner.setAlpha(enable ? 1.0f : 0.4f);
-        label.setAlpha(enable ? 1.0f : 0.4f);
-    }
-
-    // ─────────────────────────────────────────
-    // 5. Post button → validate → security dialog
-    // ─────────────────────────────────────────
     private void setupPostButton() {
         btnPostReport.setOnClickListener(v -> validateAndShowSecurityDialog());
     }
 
-    private void validateAndShowSecurityDialog() {
-        String itemName = etItemName.getText().toString().trim();
-
-        if (TextUtils.isEmpty(itemName)) {
-            etItemName.setError("Item name is required");
-            etItemName.requestFocus();
-            return;
-        }
-        if (itemName.length() < 3) {
-            etItemName.setError("Name is too short");
-            etItemName.requestFocus();
-            return;
-        }
-        if (TextUtils.isEmpty(selectedCategory)) {
-            Toast.makeText(this,
-                    "Please select a category from either list",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(selectedLocation)) {
-            Toast.makeText(this,
-                    "Please select the last seen location",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        showSecurityDialog(itemName);
-    }
-
-    // ─────────────────────────────────────────
-    // 6. Security question dialog
-    // ─────────────────────────────────────────
-    private void showSecurityDialog(String itemName) {
-
-        View dialogView = LayoutInflater.from(this)
-                .inflate(R.layout.dialog_security_questions, null);
-
-        EditText etColor = dialogView.findViewById(R.id.etSecurityColor);
-        EditText etBrand = dialogView.findViewById(R.id.etSecurityBrand);
-        EditText etMark  = dialogView.findViewById(R.id.etSecurityMark);
-
-        int hintColor = ContextCompat.getColor(this, R.color.colorTextHint);
-        etColor.setHintTextColor(hintColor);
-        etBrand.setHintTextColor(hintColor);
-        etMark.setHintTextColor(hintColor);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Verify your item")
-                .setMessage("These answers are private. Used only to confirm the real owner. Never shown publicly.")
-                .setView(dialogView)
-                .setPositiveButton("Submit & Post", null)
-                .setNegativeButton("Cancel", null)
-                .create();
-
-        dialog.show();
-
-        // override positive button to validate before dismissing
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-
-            String color = etColor.getText().toString().trim();
-            String brand = etBrand.getText().toString().trim();
-            String mark  = etMark.getText().toString().trim();
-
-            int filled = 0;
-            if (!TextUtils.isEmpty(color)) filled++;
-            if (!TextUtils.isEmpty(brand)) filled++;
-            if (!TextUtils.isEmpty(mark))  filled++;
-
-            if (filled < 2) {
-                Toast.makeText(this,
-                        "Please fill at least 2 security fields",
-                        Toast.LENGTH_SHORT).show();
-                return; // keep dialog open
+    private void setupBottomNavigation() {
+        bottomNavigation.setSelectedItemId(R.id.navigation_post);
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.navigation_home) {
+                startActivity(new Intent(this, Home.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.navigation_alerts) {
+                startActivity(new Intent(this, AlertsActivity.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.navigation_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
+                return true;
             }
-
-            securityColor = color;
-            securityBrand = brand;
-            securityMark  = mark;
-
-            dialog.dismiss();
-            postItem(itemName);
+            return true;
         });
     }
 
-    // ─────────────────────────────────────────
-    // 7. Post to Firestore
-    // ─────────────────────────────────────────
-    private void postItem(String itemName) {
-        String description = etDescription.getText().toString().trim();
+    private void validateAndShowSecurityDialog() {
+        String itemName = etItemName.getText().toString().trim();
+        if (TextUtils.isEmpty(itemName)) {
+            etItemName.setError("Required");
+            return;
+        }
+        if (spinnerCategory.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Please select a category", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (spinnerLocation.getSelectedItemPosition() == 0) {
+            Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showSecurityDialog(itemName);
+    }
 
-//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-//        if (currentUser == null) {
-//            Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private void showSecurityDialog(String itemName) {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_security_questions, null);
+        EditText etColor = dialogView.findViewById(R.id.etSecurityColor);
+        EditText etBrand = dialogView.findViewById(R.id.etSecurityBrand);
+        EditText etMark = dialogView.findViewById(R.id.etSecurityMark);
 
-// TODO: remove this bypass when LoginActivity is built
-        String postedByUid  = currentUser != null ? currentUser.getUid()         : "test_user_001";
-        String postedByName = currentUser != null ? currentUser.getDisplayName() : "Test User";
+        new AlertDialog.Builder(this)
+                .setTitle("Verify your item")
+                .setView(dialogView)
+                .setPositiveButton("Submit & Post", (dialog, which) -> {
+                    securityColor = etColor.getText().toString().trim();
+                    securityBrand = etBrand.getText().toString().trim();
+                    securityMark = etMark.getText().toString().trim();
+                    postToFirestore(itemName);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void postToFirestore(String itemName) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user != null ? user.getUid() : "test_user";
 
         btnPostReport.setEnabled(false);
-        btnPostReport.setText("Posting…");
+        resolvePosterName(uid, user, resolvedName -> {
+            if ("LOST".equals(selectedType) && selectedImageUri != null) {
+                uploadLostImageThenPost(itemName, uid, resolvedName);
+            } else {
+                postItem(itemName, uid, resolvedName, "");
+            }
+        });
+    }
+
+    private void resolvePosterName(String uid, FirebaseUser user, PosterNameCallback callback) {
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("users").document(uid).get()
+                .addOnSuccessListener(doc -> callback.onResolved(extractBestName(doc, user)))
+                .addOnFailureListener(e -> callback.onResolved(fallbackName(user)));
+    }
+
+    private String extractBestName(DocumentSnapshot userDoc, FirebaseUser user) {
+        if (userDoc != null && userDoc.exists()) {
+            String fullName = userDoc.getString("fullName");
+            if (fullName != null && !fullName.trim().isEmpty()) return fullName.trim();
+            String name = userDoc.getString("name");
+            if (name != null && !name.trim().isEmpty()) return name.trim();
+        }
+        return fallbackName(user);
+    }
+
+    private String fallbackName(FirebaseUser user) {
+        if (user != null) {
+            String display = user.getDisplayName();
+            if (display != null && !display.trim().isEmpty()) return display.trim();
+            String email = user.getEmail();
+            if (email != null && email.contains("@")) return email.substring(0, email.indexOf('@'));
+        }
+        return "User";
+    }
+
+    private void uploadLostImageThenPost(String itemName, String uid, String name) {
+        StorageReference fileRef = FirebaseStorage.getInstance()
+                .getReference()
+                .child("lost_reports")
+                .child(uid)
+                .child(System.currentTimeMillis() + ".jpg");
+        fileRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot ->
+                        fileRef.getDownloadUrl()
+                                .addOnSuccessListener(uri ->
+                                        postItem(itemName, uid, name, uri.toString()))
+                                .addOnFailureListener(e -> {
+                                    btnPostReport.setEnabled(true);
+                                    Toast.makeText(this, "Could not fetch uploaded image URL.", Toast.LENGTH_SHORT).show();
+                                }))
+                .addOnFailureListener(e -> {
+                    btnPostReport.setEnabled(true);
+                    Toast.makeText(this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void postItem(String itemName, String uid, String name, String photoUrl) {
 
         Map<String, Object> item = new HashMap<>();
-        item.put("title",         itemName);
-        item.put("category",      selectedCategory);
-        item.put("type",          selectedType);
-        item.put("status",        "ACTIVE");
-        item.put("location",      selectedLocation);
-        item.put("description",   description);
-//        item.put("postedByUid",   currentUser.getUid());
-//        item.put("postedByName",  currentUser.getDisplayName() != null
-//                ? currentUser.getDisplayName() : "Anonymous");
-        item.put("postedByUid",  postedByUid);
-        item.put("postedByName", postedByName);
-        item.put("postedAt",      System.currentTimeMillis());
-        item.put("expiresAt",     System.currentTimeMillis() + (14L * 24 * 60 * 60 * 1000));
-        item.put("photoUrl",      "");
-
-        // security answers — private, never shown on feed
+        item.put("title", itemName);
+        item.put("type", selectedType);
+        item.put("category", spinnerCategory.getSelectedItem().toString());
+        item.put("location", spinnerLocation.getSelectedItem().toString());
+        item.put("description", etDescription.getText().toString().trim());
+        item.put("postedByUid", uid);
+        item.put("postedByName", name);
+        item.put("postedAt", System.currentTimeMillis());
+        item.put("status", "ACTIVE");
         item.put("securityColor", securityColor);
         item.put("securityBrand", securityBrand);
-        item.put("securityMark",  securityMark);
+        item.put("securityMark", securityMark);
+        item.put("photoUrl", photoUrl);
 
-        FirebaseFirestore.getInstance()
-                .collection("items")
-                .add(item)
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("items").add(item)
                 .addOnSuccessListener(documentReference -> {
-                    btnPostReport.setEnabled(true);
-                    btnPostReport.setText("Post report");
-                    Toast.makeText(this,
-                            "Posted successfully!",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Posted successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     btnPostReport.setEnabled(true);
-                    btnPostReport.setText("Post report");
-                    Toast.makeText(this,
-                            "Failed: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private interface PosterNameCallback {
+        void onResolved(String name);
     }
 }

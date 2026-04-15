@@ -14,6 +14,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.firebase.FirebaseApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -115,7 +116,7 @@ public class Home extends AppCompatActivity {
         }
         String uid = user.getUid();
 
-        pendingPosterListener = FirebaseFirestore.getInstance()
+        pendingPosterListener = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("posterUid", uid)
                 .whereEqualTo("status", "PENDING")
@@ -124,7 +125,7 @@ public class Home extends AppCompatActivity {
                     refreshAlertsBellFromPending();
                 });
 
-        pendingClaimerListener = FirebaseFirestore.getInstance()
+        pendingClaimerListener = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("claimerUid", uid)
                 .whereEqualTo("status", "PENDING")

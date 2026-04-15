@@ -16,8 +16,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -32,12 +32,11 @@ import java.util.Map;
 public class HomeFragment extends Fragment {
 
     private RecyclerView       rvFeed;
-    private SwipeRefreshLayout swipeRefresh;
     private LinearLayout       layoutEmptyState;
     private EditText           etSearch;
-    private TextView           tvEmptySubtitle;
-    private TextView           tvActiveCount, tvLostCount, tvFoundCount;
-    private TextView           chipAll, chipLost, chipFound, chipHostel, chipMine;
+    private TextView           tvSectionTitle, tvViewAll;
+    private TextView           tvActiveCount, tvFoundCount;
+    private TextView           chipAll, chipClaims, chipLost, chipFound, chipMine;
 
     private FeedCardAdapter                 adapter;
     private final List<Map<String, Object>> allItems      = new ArrayList<>();
@@ -63,30 +62,35 @@ public class HomeFragment extends Fragment {
         setupRecyclerView();
         setupChips();
         setupSearch();
-        setupSwipeRefresh();
+        setupViewAll();
         setFilter("ALL");
         listenToFeed();
     }
 
     private void bindViews(View view) {
         rvFeed           = view.findViewById(R.id.rvFeed);
-        swipeRefresh     = view.findViewById(R.id.swipeRefresh);
         layoutEmptyState = view.findViewById(R.id.layoutEmptyState);
         etSearch         = view.findViewById(R.id.etSearch);
-        tvEmptySubtitle  = view.findViewById(R.id.tvEmptySubtitle);
+        tvSectionTitle   = view.findViewById(R.id.tvSectionTitle);
+        tvViewAll        = view.findViewById(R.id.tvViewAll);
         tvActiveCount    = view.findViewById(R.id.tvActiveCount);
-        tvLostCount      = view.findViewById(R.id.tvLostCount);
         tvFoundCount     = view.findViewById(R.id.tvFoundCount);
         chipAll          = view.findViewById(R.id.chipAll);
+        chipClaims       = view.findViewById(R.id.chipClaims);
         chipLost         = view.findViewById(R.id.chipLost);
         chipFound        = view.findViewById(R.id.chipFound);
-        chipHostel       = view.findViewById(R.id.chipHostel);
         chipMine         = view.findViewById(R.id.chipMine);
     }
 
     private void setupToolbar(View view) {
         view.findViewById(R.id.btnAddPost).setOnClickListener(v ->
                 startActivity(new Intent(getActivity(), PostActivity.class)));
+    }
+
+    private void setupViewAll() {
+        if (tvViewAll != null) {
+            tvViewAll.setOnClickListener(v -> setFilter("ALL"));
+        }
     }
 
     private void setupRecyclerView() {
@@ -116,27 +120,29 @@ public class HomeFragment extends Fragment {
 
     private void setupChips() {
         chipAll.setOnClickListener(v    -> setFilter("ALL"));
+        chipClaims.setOnClickListener(v -> setFilter("CLAIMS"));
         chipLost.setOnClickListener(v   -> setFilter("LOST"));
         chipFound.setOnClickListener(v  -> setFilter("FOUND"));
-        chipHostel.setOnClickListener(v -> setFilter("HOSTEL"));
         chipMine.setOnClickListener(v   -> setFilter("MINE"));
     }
 
     private void setFilter(String filter) {
         currentFilter = filter;
         resetChips();
-        switch (filter) {
-            case "ALL":    styleChipSelected(chipAll);    break;
-            case "LOST":   styleChipSelected(chipLost);   break;
-            case "FOUND":  styleChipSelected(chipFound);  break;
-            case "HOSTEL": styleChipSelected(chipHostel); break;
-            case "MINE":   styleChipSelected(chipMine);   break;
+        if (tvSectionTitle != null) {
+            switch (filter) {
+                case "ALL":    styleChipSelected(chipAll);    tvSectionTitle.setText("Recent Updates"); break;
+                case "CLAIMS": styleChipSelected(chipClaims); tvSectionTitle.setText("Your Item Claims"); break;
+                case "LOST":   styleChipSelected(chipLost);   tvSectionTitle.setText("Lost Items"); break;
+                case "FOUND":  styleChipSelected(chipFound);  tvSectionTitle.setText("Found Items"); break;
+                case "MINE":   styleChipSelected(chipMine);   tvSectionTitle.setText("My Posts"); break;
+            }
         }
         applyFilterAndSearch();
     }
 
     private void resetChips() {
-        for (TextView c : new TextView[]{chipAll, chipLost, chipFound, chipHostel, chipMine}) {
+        for (TextView c : new TextView[]{chipAll, chipClaims, chipLost, chipFound, chipMine}) {
             c.setBackgroundResource(R.drawable.bg_home_chip_unselected);
             c.setTextColor(requireContext().getColor(R.color.home_chip_unselected_text));
         }
@@ -158,15 +164,9 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void setupSwipeRefresh() {
-        swipeRefresh.setColorSchemeColors(requireContext().getColor(R.color.home_primary_blue));
-        swipeRefresh.setOnRefreshListener(() -> swipeRefresh.setRefreshing(false));
-    }
-
     private void listenToFeed() {
-        listenerReg = FirebaseFirestore.getInstance()
+        listenerReg = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("items")
-                .whereEqualTo("status", "ACTIVE")
                 .orderBy("postedAt", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;
@@ -175,12 +175,15 @@ public class HomeFragment extends Fragment {
                     for (QueryDocumentSnapshot doc : snapshots) {
                         Map<String, Object> item = doc.getData();
                         item.put("itemId", doc.getId());
-                        allItems.add(item);
-                        if ("LOST".equals(item.get("type")))  lost++;
-                        if ("FOUND".equals(item.get("type"))) found++;
+                        String type = getString(item, "type");
+                        // Home feed is public for all users and shows only active LOST/FOUND style posts.
+                        if ("LOST".equals(type) || "FOUND".equals(type)) {
+                            allItems.add(item);
+                            if ("LOST".equals(type))  lost++;
+                            if ("FOUND".equals(type)) found++;
+                        }
                     }
                     tvActiveCount.setText(String.valueOf(allItems.size()));
-                    tvLostCount.setText(String.valueOf(lost));
                     tvFoundCount.setText(String.valueOf(found));
                     applyFilterAndSearch();
                 });
@@ -201,7 +204,7 @@ public class HomeFragment extends Fragment {
             switch (currentFilter) {
                 case "LOST":   passesFilter = "LOST".equals(type);         break;
                 case "FOUND":  passesFilter = "FOUND".equals(type);        break;
-                case "HOSTEL": passesFilter = location.contains("hostel"); break;
+                case "CLAIMS": passesFilter = currentUserId.equals(postedByUid); break;
                 case "MINE":   passesFilter = currentUserId.equals(postedByUid); break;
             }
             boolean passesSearch = searchQuery.isEmpty()
@@ -214,7 +217,6 @@ public class HomeFragment extends Fragment {
         boolean empty = filteredItems.isEmpty();
         rvFeed.setVisibility(empty ? View.GONE : View.VISIBLE);
         layoutEmptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
-        tvEmptySubtitle.setText(getEmptyStateMessage());
     }
 
     private String getEmptyStateMessage() {
@@ -227,8 +229,8 @@ public class HomeFragment extends Fragment {
                 return getString(R.string.home_empty_lost);
             case "FOUND":
                 return getString(R.string.home_empty_found);
-            case "HOSTEL":
-                return getString(R.string.home_empty_hostel);
+            case "CLAIMS":
+                return "No claim-related items right now.";
             case "MINE":
                 return getString(R.string.home_empty_mine);
             default:

@@ -15,9 +15,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.backtoyou.databinding.ActivityProfileBinding;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -88,13 +93,13 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseFirestore.getInstance()
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("users")
                 .document(user.getUid())
                 .get()
                 .addOnSuccessListener(document -> {
                     if (!document.exists()) {
-                        signOutAndGoToLogin();
+                        bindAuthFallbackProfile(user);
                         return;
                     }
 
@@ -110,7 +115,42 @@ public class ProfileActivity extends AppCompatActivity {
                     );
                     bindProfile(currentProfile);
                 })
-                .addOnFailureListener(e -> signOutAndGoToLogin());
+                .addOnFailureListener(e -> bindAuthFallbackProfile(user));
+    }
+
+    private void bindAuthFallbackProfile(@NonNull FirebaseUser user) {
+        String email = valueOrFallback(user.getEmail(), "");
+        String displayName = valueOrFallback(user.getDisplayName(),
+                email.contains("@") ? email.substring(0, email.indexOf('@')) : "PingUS User");
+        currentProfile = new UserProfile(
+                displayName,
+                email,
+                valueOrFallback(currentProfile.getRole(), "Member"),
+                valueOrFallback(currentProfile.getStudentId(), "Not available"),
+                valueOrFallback(currentProfile.getDepartment(), "Not available"),
+                valueOrFallback(currentProfile.getPhoneNumber(), "Not available"),
+                currentProfile.getPostsCount(),
+                currentProfile.getAlertsCount()
+        );
+        bindProfile(currentProfile);
+        ensureProfileDocument(user, currentProfile);
+        Toast.makeText(this, "Profile loaded from account session.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void ensureProfileDocument(@NonNull FirebaseUser user, @NonNull UserProfile profile) {
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("uid", user.getUid());
+        userMap.put("fullName", valueOrFallback(profile.getName(), "PingUS User"));
+        userMap.put("email", valueOrFallback(profile.getEmail(), valueOrFallback(user.getEmail(), "")));
+        userMap.put("role", valueOrFallback(profile.getRole(), "Member"));
+        userMap.put("studentId", valueOrFallback(profile.getStudentId(), "Not available"));
+        userMap.put("department", valueOrFallback(profile.getDepartment(), "Not available"));
+        userMap.put("phone", valueOrFallback(profile.getPhoneNumber(), "Not available"));
+
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("users")
+                .document(user.getUid())
+                .set(userMap, SetOptions.merge());
     }
 
     private void setupBottomNavigation() {
@@ -190,7 +230,7 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseFirestore.getInstance()
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("users")
                 .document(user.getUid())
                 .update("phone", updatedPhone);
