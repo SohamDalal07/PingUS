@@ -18,8 +18,8 @@ public final class CategoryDrawableHelper {
         if (c.contains("cards & documents") || isDocuments(c)) return R.drawable.documents;
         if (c.contains("stationery & books") || isStationery(c)) return R.drawable.stationary;
         if (c.contains("keys & access") || isKeys(c)) return R.drawable.keys;
-        if (c.contains("bags & clothing") || isBags(c)) return R.drawable.documents;
-        if (c.contains("personal & others") || isPersonal(c)) return R.drawable.stationary;
+        if (c.contains("bags & clothing") || isBags(c)) return R.drawable.bags_clothing;
+        if (c.contains("personal & others") || isPersonal(c)) return R.drawable.personal_others;
         return defaultRes == 0 ? R.drawable.electronics : defaultRes;
     }
 
@@ -56,6 +56,7 @@ public final class CategoryDrawableHelper {
     /** {@code true} for JPEG/PNG campus artwork (not vector icons). */
     public static boolean isCampusPhoto(@DrawableRes int res) {
         return res == R.drawable.electronics || res == R.drawable.documents
-                || res == R.drawable.stationary || res == R.drawable.keys;
+                || res == R.drawable.stationary || res == R.drawable.keys
+                || res == R.drawable.bags_clothing || res == R.drawable.personal_others;
     }
 }

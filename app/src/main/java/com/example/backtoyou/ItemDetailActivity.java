@@ -37,6 +37,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     private String posterEmail = "";
     private String posterPhone = "";
     private String currentUserId, posterUid, itemId;
+    private String itemType = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +83,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         itemId = intent.getStringExtra("itemId");
         String title = intent.getStringExtra("title");
         String type = intent.getStringExtra("type");
+        itemType = type != null ? type : "";
         String category = intent.getStringExtra("category");
         String location = intent.getStringExtra("location");
         String description = intent.getStringExtra("description");
@@ -116,14 +118,12 @@ public class ItemDetailActivity extends AppCompatActivity {
         currentUserId = user != null ? user.getUid() : "test_user_001";
         
         if (currentUserId.equals(posterUid)) {
-            layoutContactButtons.setVisibility(View.VISIBLE);
-            layoutClaimItem.setVisibility(View.GONE);
-            if (posterUid != null) {
-                fetchContactInfo(posterUid);
-            }
-            setupContactClickListeners();
-        } else {
             layoutContactButtons.setVisibility(View.GONE);
+            layoutClaimItem.setVisibility(View.GONE);
+        } else {
+            layoutContactButtons.setVisibility(View.VISIBLE);
+            fetchContactInfo(posterUid);
+            setupContactClickListeners();
             layoutClaimItem.setVisibility(View.VISIBLE);
             checkClaimStatus();
         }
@@ -141,7 +141,7 @@ public class ItemDetailActivity extends AppCompatActivity {
             .addOnSuccessListener(queryDocumentSnapshots -> {
                 if (queryDocumentSnapshots.isEmpty()) {
                     btnClaimItem.setEnabled(true);
-                    btnClaimItem.setText("Claim Item");
+                    btnClaimItem.setText("Is this the item you lost?");
                     btnClaimItem.setOnClickListener(v -> showClaimDialog());
                 } else {
                     DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);
@@ -149,6 +149,9 @@ public class ItemDetailActivity extends AppCompatActivity {
                     if ("PENDING".equals(status)) {
                         btnClaimItem.setEnabled(false);
                         btnClaimItem.setText("Claim Pending Approval...");
+                    } else if ("PENDING_CLAIMER_CONFIRMATION".equals(status)) {
+                        btnClaimItem.setEnabled(false);
+                        btnClaimItem.setText("Please confirm in Alerts");
                     } else if ("APPROVED".equals(status)) {
                         layoutClaimItem.setVisibility(View.GONE);
                         layoutContactButtons.setVisibility(View.VISIBLE);
@@ -214,6 +217,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         claimData.put("claimerUid", currentUserId);
         claimData.put("claimerName", claimerName);
         claimData.put("posterUid", posterUid);
+        claimData.put("posterName", tvPoster.getText().toString().trim());
         claimData.put("colorAns", color);
         claimData.put("brandAns", brand);
         claimData.put("markAns", mark);
@@ -227,7 +231,7 @@ public class ItemDetailActivity extends AppCompatActivity {
             })
             .addOnFailureListener(e -> {
                 btnClaimItem.setEnabled(true);
-                btnClaimItem.setText("Claim Item");
+                btnClaimItem.setText("Is this the item you lost?");
                 Toast.makeText(this, "Failed to submit claim.", Toast.LENGTH_SHORT).show();
             });
     }

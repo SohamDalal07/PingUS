@@ -1,6 +1,9 @@
 package com.example.backtoyou;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
+import android.graphics.Bitmap;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,13 +33,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Calendar;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class PostActivity extends AppCompatActivity {
 
     private Button btnPostReport;
-    private EditText etItemName, etDescription;
+    private EditText etItemName, etDescription, etPostDateTime;
     private Spinner spinnerLocation, spinnerCategory;
     private LinearLayout layoutFound, layoutLost, layoutPhotoTap;
     private ImageView ivPhotoPreview;
@@ -45,7 +53,11 @@ public class PostActivity extends AppCompatActivity {
     private String selectedType = "FOUND";
     private String securityColor = "", securityBrand = "", securityMark = "";
     private Uri selectedImageUri;
+    private byte[] selectedImageBytes;
     private ActivityResultLauncher<String> pickImageLauncher;
+    private ActivityResultLauncher<Void> captureImageLauncher;
+    private long selectedPostedAtMillis;
+    private boolean forceFirstPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,15 +68,18 @@ public class PostActivity extends AppCompatActivity {
         setupToolbar();
         setupTypeSelectors();
         setupSpinners();
+        setupDateTimePicker();
         setupPhotoPicker();
         setupPostButton();
         setupBottomNavigation();
+        forceFirstPost = getIntent() != null && getIntent().getBooleanExtra("forceFirstPost", false);
     }
 
     private void bindViews() {
         btnPostReport = findViewById(R.id.btnPostReport);
         etItemName = findViewById(R.id.etItemName);
         etDescription = findViewById(R.id.etDescription);
+        etPostDateTime = findViewById(R.id.etPostDateTime);
         spinnerLocation = findViewById(R.id.spinnerLocation);
         spinnerCategory = findViewById(R.id.spinnerCategory);
         layoutFound = findViewById(R.id.layoutFound);
@@ -72,6 +87,56 @@ public class PostActivity extends AppCompatActivity {
         layoutPhotoTap = findViewById(R.id.layoutPhotoTap);
         ivPhotoPreview = findViewById(R.id.ivPhotoPreview);
         bottomNavigation = findViewById(R.id.bottom_navigation);
+    }
+
+    private void setupDateTimePicker() {
+        selectedPostedAtMillis = System.currentTimeMillis();
+        bindSelectedDateTime();
+        if (etPostDateTime == null) return;
+        etPostDateTime.setOnClickListener(v -> openDatePicker());
+    }
+
+    private void openDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selectedPostedAtMillis);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                this,
+                (view, year, month, dayOfMonth) -> openTimePicker(year, month, dayOfMonth),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+    private void openTimePicker(int year, int month, int dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selectedPostedAtMillis);
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                this,
+                (view, hourOfDay, minute) -> {
+                    Calendar picked = Calendar.getInstance();
+                    picked.set(Calendar.YEAR, year);
+                    picked.set(Calendar.MONTH, month);
+                    picked.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    picked.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    picked.set(Calendar.MINUTE, minute);
+                    picked.set(Calendar.SECOND, 0);
+                    picked.set(Calendar.MILLISECOND, 0);
+                    selectedPostedAtMillis = picked.getTimeInMillis();
+                    bindSelectedDateTime();
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                false
+        );
+        timePickerDialog.show();
+    }
+
+    private void bindSelectedDateTime() {
+        if (etPostDateTime == null) return;
+        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
+        etPostDateTime.setText(format.format(new Date(selectedPostedAtMillis)));
     }
 
     private void setupToolbar() {
@@ -106,34 +171,46 @@ public class PostActivity extends AppCompatActivity {
         pickImageLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
             if (uri == null) return;
             selectedImageUri = uri;
+            selectedImageBytes = null;
             if (ivPhotoPreview != null) {
                 ivPhotoPreview.setVisibility(View.VISIBLE);
                 Glide.with(this).load(uri).centerCrop().into(ivPhotoPreview);
             }
         });
 
+        captureImageLauncher = registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
+            if (bitmap == null) return;
+            selectedImageUri = null;
+            selectedImageBytes = bitmapToJpegBytes(bitmap);
+            if (ivPhotoPreview != null) {
+                ivPhotoPreview.setVisibility(View.VISIBLE);
+                ivPhotoPreview.setImageBitmap(bitmap);
+            }
+        });
+
         if (layoutPhotoTap != null) {
-            layoutPhotoTap.setOnClickListener(v -> {
-                if (!"LOST".equals(selectedType)) {
-                    Toast.makeText(this, "Image upload is available only for 'I Lost It'.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (pickImageLauncher != null) pickImageLauncher.launch("image/*");
-            });
+            layoutPhotoTap.setOnClickListener(v -> showImageSourceDialog());
         }
+    }
+
+    private void showImageSourceDialog() {
+        String[] options = {"Upload from gallery", "Click from camera"};
+        new AlertDialog.Builder(this)
+                .setTitle("Add item photo")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        if (pickImageLauncher != null) pickImageLauncher.launch("image/*");
+                    } else if (which == 1) {
+                        if (captureImageLauncher != null) captureImageLauncher.launch(null);
+                    }
+                })
+                .show();
     }
 
     private void updatePhotoSectionForType() {
         if (layoutPhotoTap == null) return;
-        boolean showPhotoSection = "LOST".equals(selectedType);
-        layoutPhotoTap.setVisibility(showPhotoSection ? View.VISIBLE : View.GONE);
-        if (!showPhotoSection) {
-            selectedImageUri = null;
-            if (ivPhotoPreview != null) {
-                ivPhotoPreview.setImageDrawable(null);
-                ivPhotoPreview.setVisibility(View.GONE);
-            }
-        }
+        // Photo evidence is supported for both LOST and FOUND flows.
+        layoutPhotoTap.setVisibility(View.VISIBLE);
     }
 
     private void setupSpinners() {
@@ -157,6 +234,10 @@ public class PostActivity extends AppCompatActivity {
         bottomNavigation.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_home) {
+                if (forceFirstPost) {
+                    Toast.makeText(this, "Please submit your first post before opening Home.", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
                 startActivity(new Intent(this, Home.class));
                 finish();
                 return true;
@@ -215,8 +296,8 @@ public class PostActivity extends AppCompatActivity {
 
         btnPostReport.setEnabled(false);
         resolvePosterName(uid, user, resolvedName -> {
-            if ("LOST".equals(selectedType) && selectedImageUri != null) {
-                uploadLostImageThenPost(itemName, uid, resolvedName);
+            if (selectedImageUri != null || selectedImageBytes != null) {
+                uploadImageThenPost(itemName, uid, resolvedName);
             } else {
                 postItem(itemName, uid, resolvedName, "");
             }
@@ -249,25 +330,51 @@ public class PostActivity extends AppCompatActivity {
         return "User";
     }
 
-    private void uploadLostImageThenPost(String itemName, String uid, String name) {
+    private void uploadImageThenPost(String itemName, String uid, String name) {
         StorageReference fileRef = FirebaseStorage.getInstance()
                 .getReference()
-                .child("lost_reports")
+                .child("item_reports")
+                .child(selectedType.toLowerCase())
                 .child(uid)
                 .child(System.currentTimeMillis() + ".jpg");
-        fileRef.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot ->
-                        fileRef.getDownloadUrl()
-                                .addOnSuccessListener(uri ->
-                                        postItem(itemName, uid, name, uri.toString()))
-                                .addOnFailureListener(e -> {
-                                    btnPostReport.setEnabled(true);
-                                    Toast.makeText(this, "Could not fetch uploaded image URL.", Toast.LENGTH_SHORT).show();
-                                }))
-                .addOnFailureListener(e -> {
-                    btnPostReport.setEnabled(true);
-                    Toast.makeText(this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        if (selectedImageUri != null) {
+            fileRef.putFile(selectedImageUri)
+                    .addOnSuccessListener(taskSnapshot ->
+                            fileRef.getDownloadUrl()
+                                    .addOnSuccessListener(uri ->
+                                            postItem(itemName, uid, name, uri.toString()))
+                                    .addOnFailureListener(e -> {
+                                        btnPostReport.setEnabled(true);
+                                        Toast.makeText(this, "Could not fetch uploaded image URL.", Toast.LENGTH_SHORT).show();
+                                    }))
+                    .addOnFailureListener(e -> {
+                        btnPostReport.setEnabled(true);
+                        Toast.makeText(this, "Image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+            return;
+        }
+
+        if (selectedImageBytes != null) {
+            fileRef.putBytes(selectedImageBytes)
+                    .addOnSuccessListener(taskSnapshot ->
+                            fileRef.getDownloadUrl()
+                                    .addOnSuccessListener(uri ->
+                                            postItem(itemName, uid, name, uri.toString()))
+                                    .addOnFailureListener(e -> {
+                                        btnPostReport.setEnabled(true);
+                                        Toast.makeText(this, "Could not fetch captured image URL.", Toast.LENGTH_SHORT).show();
+                                    }))
+                    .addOnFailureListener(e -> {
+                        btnPostReport.setEnabled(true);
+                        Toast.makeText(this, "Camera image upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        }
+    }
+
+    private byte[] bitmapToJpegBytes(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+        return stream.toByteArray();
     }
 
     private void postItem(String itemName, String uid, String name, String photoUrl) {
@@ -280,7 +387,7 @@ public class PostActivity extends AppCompatActivity {
         item.put("description", etDescription.getText().toString().trim());
         item.put("postedByUid", uid);
         item.put("postedByName", name);
-        item.put("postedAt", System.currentTimeMillis());
+        item.put("postedAt", selectedPostedAtMillis);
         item.put("status", "ACTIVE");
         item.put("securityColor", securityColor);
         item.put("securityBrand", securityBrand);
@@ -289,13 +396,29 @@ public class PostActivity extends AppCompatActivity {
 
         FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("items").add(item)
                 .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this, "Posted successfully!", Toast.LENGTH_SHORT).show();
-                    finish();
+                    markFirstPostCompletedAndFinish(uid);
                 })
                 .addOnFailureListener(e -> {
                     btnPostReport.setEnabled(true);
                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void markFirstPostCompletedAndFinish(String uid) {
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("users")
+                .document(uid)
+                .update("hasPostedFirstItem", true)
+                .addOnSuccessListener(unused -> finishPostFlow())
+                .addOnFailureListener(e -> finishPostFlow());
+    }
+
+    private void finishPostFlow() {
+        Toast.makeText(this, "Posted successfully!", Toast.LENGTH_SHORT).show();
+        if (forceFirstPost) {
+            startActivity(new Intent(this, Home.class));
+        }
+        finish();
     }
 
     private interface PosterNameCallback {

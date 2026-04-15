@@ -239,7 +239,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:backgroundTint="#4F46E5"
-                    android:text="Claim this item"
+                    android:text="Is this the item you lost?"
                     android:textAllCaps="false"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -251,7 +251,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:lineSpacingExtra="2dp"
-                    android:text="Tap Claim and answer the security questions. The poster will review your request."
+                    android:text="Tap and answer security questions. Poster reviews first, then you confirm yes/no in Alerts."
                     android:textColor="#64748B"
                     android:textSize="13sp"
                     android:visibility="visible" />

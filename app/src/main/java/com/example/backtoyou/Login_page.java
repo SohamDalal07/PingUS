@@ -23,8 +23,10 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -183,8 +185,9 @@ public class Login_page extends AppCompatActivity {
         if (email.isEmpty()) {
             emailLayoutSignIn.setError("Email is required");
             isValid = false;
-        } else if (!email.endsWith("@university.in") && !email.contains("@")) {
-            emailLayoutSignIn.setError("Must be a valid university email");
+        } else if (!isAllowedEmail(email)) {
+            emailLayoutSignIn.setError("Use a valid @nmims.in or .edu email");
+            Toast.makeText(this, "Enter a valid email", Toast.LENGTH_SHORT).show();
             isValid = false;
         } else {
             emailLayoutSignIn.setError(null);
@@ -211,9 +214,8 @@ public class Login_page extends AppCompatActivity {
 
                         if (task.isSuccessful()) {
                             Toast.makeText(Login_page.this, "Sign in successful!", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(Login_page.this, Home.class);
-                            startActivity(intent);
-                            finish();
+                            FirebaseUser signedInUser = FirebaseAuth.getInstance().getCurrentUser();
+                            routeAfterSuccessfulAuth(signedInUser);
                         } else {
                             Toast.makeText(Login_page.this, "Authentication failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
@@ -246,8 +248,9 @@ public class Login_page extends AppCompatActivity {
         if (emailText.isEmpty()) {
             emailLayoutSignUp.setError("Email is required");
             isValid = false;
-        } else if (!emailText.endsWith("@university.in") && !emailText.contains("@")) {
-            emailLayoutSignUp.setError("Must be a valid university email");
+        } else if (!isAllowedEmail(emailText)) {
+            emailLayoutSignUp.setError("Use a valid @nmims.in or .edu email");
+            Toast.makeText(this, "Enter a valid email", Toast.LENGTH_SHORT).show();
             isValid = false;
         } else {
             emailLayoutSignUp.setError(null);
@@ -324,8 +327,9 @@ public class Login_page extends AppCompatActivity {
                                 userMap.put("department", departmentText);
                                 userMap.put("phone", phone.getText().toString().trim());
                                 userMap.put("uid", uid);
+                                userMap.put("hasPostedFirstItem", false);
 
-                                FirebaseFirestore.getInstance(com.google.firebase.FirebaseApp.getInstance(), "lf26").collection("users")
+                                FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("users")
                                         .document(uid).set(userMap)
                                         .addOnCompleteListener(dbTask -> {
                                             btnCreateAccount.setEnabled(true);
@@ -402,5 +406,41 @@ public class Login_page extends AppCompatActivity {
         passwordSignUp.setText("");
         confirmPassword.setText("");
         termsCheckbox.setChecked(false);
+    }
+
+    private boolean isAllowedEmail(String email) {
+        if (email == null) return false;
+        String normalized = email.trim().toLowerCase();
+        return normalized.endsWith("@nmims.in") || normalized.endsWith(".edu");
+    }
+
+    private void routeAfterSuccessfulAuth(FirebaseUser user) {
+        if (user == null) {
+            Intent intent = new Intent(Login_page.this, Home.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("users")
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(document -> {
+                    boolean hasPostedFirstItem = document.exists() && Boolean.TRUE.equals(document.getBoolean("hasPostedFirstItem"));
+                    Intent intent;
+                    if (hasPostedFirstItem) {
+                        intent = new Intent(Login_page.this, Home.class);
+                    } else {
+                        intent = new Intent(Login_page.this, PostActivity.class);
+                        intent.putExtra("forceFirstPost", true);
+                    }
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Intent intent = new Intent(Login_page.this, Home.class);
+                    startActivity(intent);
+                    finish();
+                });
     }
 }

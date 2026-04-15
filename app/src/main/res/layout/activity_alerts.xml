@@ -211,6 +211,42 @@
                         </LinearLayout>
                     </LinearLayout>
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="SECURITY ANSWERS"
+                        android:textColor="#9CA3AF"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvCurrentColorAnswer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Color: -"
+                        android:textColor="#111827"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvCurrentBrandAnswer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Brand: -"
+                        android:textColor="#111827"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/tvCurrentMarkAnswer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Mark: -"
+                        android:textColor="#111827"
+                        android:textSize="13sp" />
+
                     <LinearLayout
                         android:id="@+id/layoutApproveReject"
                         android:layout_width="match_parent"

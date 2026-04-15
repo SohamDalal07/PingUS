@@ -18,6 +18,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 
@@ -27,6 +28,7 @@ public class Home extends AppCompatActivity {
     private ListenerRegistration pendingClaimerListener;
     private boolean pendingAsPoster;
     private boolean pendingAsClaimer;
+    private boolean redirectedForFirstPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +81,7 @@ public class Home extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        enforceFirstPostGate();
         attachPendingClaimBadgeListeners();
         Toolbar toolbar = findViewById(R.id.top_toolbar);
         if (toolbar != null) {
@@ -119,24 +122,60 @@ public class Home extends AppCompatActivity {
         pendingPosterListener = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("posterUid", uid)
-                .whereEqualTo("status", "PENDING")
                 .addSnapshotListener((snap, e) -> {
-                    pendingAsPoster = snap != null && !snap.isEmpty();
+                    pendingAsPoster = false;
+                    if (snap != null) {
+                        for (DocumentSnapshot doc : snap.getDocuments()) {
+                            String status = doc.getString("status");
+                            if ("PENDING".equalsIgnoreCase(status) || "APPROVED".equalsIgnoreCase(status)) {
+                                pendingAsPoster = true;
+                                break;
+                            }
+                        }
+                    }
                     refreshAlertsBellFromPending();
                 });
 
         pendingClaimerListener = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("claimerUid", uid)
-                .whereEqualTo("status", "PENDING")
                 .addSnapshotListener((snap, e) -> {
-                    pendingAsClaimer = snap != null && !snap.isEmpty();
+                    pendingAsClaimer = false;
+                    if (snap != null) {
+                        for (DocumentSnapshot doc : snap.getDocuments()) {
+                            String status = doc.getString("status");
+                            if ("PENDING_CLAIMER_CONFIRMATION".equalsIgnoreCase(status)) {
+                                pendingAsClaimer = true;
+                                break;
+                            }
+                        }
+                    }
                     refreshAlertsBellFromPending();
                 });
     }
 
     private void refreshAlertsBellFromPending() {
         updateAlertsBellIcon(pendingAsPoster || pendingAsClaimer);
+    }
+
+    private void enforceFirstPostGate() {
+        if (redirectedForFirstPost) return;
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("users")
+                .document(user.getUid())
+                .get()
+                .addOnSuccessListener(doc -> {
+                    boolean hasPostedFirstItem = doc.exists() && Boolean.TRUE.equals(doc.getBoolean("hasPostedFirstItem"));
+                    if (!hasPostedFirstItem) {
+                        redirectedForFirstPost = true;
+                        Intent intent = new Intent(Home.this, PostActivity.class);
+                        intent.putExtra("forceFirstPost", true);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
     }
 
     private void updateAlertsBellIcon(boolean hasPending) {
@@ -164,6 +203,9 @@ public class Home extends AppCompatActivity {
     public boolean onOptionsItemSelected(android.view.MenuItem item) {
         if (item.getItemId() == R.id.action_alerts) {
             startActivity(new Intent(Home.this, AlertsActivity.class));
+            return true;
+        } else if (item.getItemId() == R.id.action_settings) {
+            startActivity(new Intent(Home.this, ProfileActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);

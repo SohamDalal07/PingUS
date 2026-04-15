@@ -1,14 +1,17 @@
 package com.example.backtoyou;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +27,9 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AlertsActivity extends AppCompatActivity implements AlertAdapter.OnClaimActionListener {
 
@@ -38,15 +43,24 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
     private TextView tvCurrentItemMeta;
     private TextView tvCurrentClaimId;
     private TextView tvCurrentReceiver;
+    private TextView tvCurrentColorAnswer;
+    private TextView tvCurrentBrandAnswer;
+    private TextView tvCurrentMarkAnswer;
     private View layoutApproveReject;
     private View btnApproveProcessing;
     private View btnRejectProcessing;
+    private View btnCurrentCall;
+    private View btnCurrentEmail;
+    private View btnCurrentWhatsapp;
     private BottomNavigationView bottomNavigation;
     private AlertAdapter adapter;
     private DocumentSnapshot currentProcessingClaim;
     private List<DocumentSnapshot> posterClaimsList = new ArrayList<>();
     private List<DocumentSnapshot> claimerClaimsList = new ArrayList<>();
     private List<DocumentSnapshot> unifiedClaimsList = new ArrayList<>();
+    private String currentUserId = "";
+    private String currentContactPhone = "";
+    private String currentContactEmail = "";
     
     private ListenerRegistration posterListenerReg;
     private ListenerRegistration claimerListenerReg;
@@ -71,12 +85,17 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
         tvCurrentItemMeta = findViewById(R.id.tvCurrentItemMeta);
         tvCurrentClaimId = findViewById(R.id.tvCurrentClaimId);
         tvCurrentReceiver = findViewById(R.id.tvCurrentReceiver);
+        tvCurrentColorAnswer = findViewById(R.id.tvCurrentColorAnswer);
+        tvCurrentBrandAnswer = findViewById(R.id.tvCurrentBrandAnswer);
+        tvCurrentMarkAnswer = findViewById(R.id.tvCurrentMarkAnswer);
         layoutApproveReject = findViewById(R.id.layoutApproveReject);
         btnApproveProcessing = findViewById(R.id.btnApproveProcessing);
         btnRejectProcessing = findViewById(R.id.btnRejectProcessing);
+        btnCurrentCall = findViewById(R.id.btnCurrentCall);
+        btnCurrentEmail = findViewById(R.id.btnCurrentEmail);
+        btnCurrentWhatsapp = findViewById(R.id.btnCurrentWhatsapp);
         bottomNavigation = findViewById(R.id.bottom_navigation);
 
-        String currentUserId = "";
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             currentUserId = user.getUid();
@@ -142,11 +161,10 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
                     }
                 });
 
-        // Listener 2: As Claimer (Checking for APPROVED claims)
+        // Listener 2: As Claimer (all statuses; filter in UI for actions/history)
         claimerListenerReg = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
                 .collection("claims")
                 .whereEqualTo("claimerUid", currentUserId)
-                .whereEqualTo("status", "APPROVED")
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e("AlertsActivity", "Claimer listen failed.", error);
@@ -190,7 +208,10 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
         DocumentSnapshot pending = null;
         for (DocumentSnapshot d : unifiedClaimsList) {
             String status = d.getString("status");
-            if ("PENDING".equalsIgnoreCase(status)) {
+            boolean isPoster = isCurrentUserPosterForClaim(d);
+            boolean needsPosterReview = isPoster && "PENDING".equalsIgnoreCase(status);
+            boolean needsClaimerConfirmation = !isPoster && "PENDING_CLAIMER_CONFIRMATION".equalsIgnoreCase(status);
+            if (needsPosterReview || needsClaimerConfirmation) {
                 pending = d;
                 break;
             }
@@ -203,11 +224,19 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
             return;
         }
         currentProcessingClaim = pending;
+        boolean isPoster = isCurrentUserPosterForClaim(pending);
+        String status = pending.getString("status");
 
         if (tvCurrentProcessingHeading != null) tvCurrentProcessingHeading.setVisibility(View.VISIBLE);
         if (cardCurrentProcessing != null) cardCurrentProcessing.setVisibility(View.VISIBLE);
         if (layoutApproveReject != null) layoutApproveReject.setVisibility(View.VISIBLE);
-        if (tvCurrentStatus != null) tvCurrentStatus.setText("PENDING");
+        if (tvCurrentStatus != null) {
+            if ("PENDING_CLAIMER_CONFIRMATION".equalsIgnoreCase(status)) {
+                tvCurrentStatus.setText("CONFIRMATION REQUIRED");
+            } else {
+                tvCurrentStatus.setText("PENDING");
+            }
+        }
         if (tvCurrentItemTitle != null) {
             String title = pending.getString("itemTitle");
             tvCurrentItemTitle.setText(title != null && !title.trim().isEmpty() ? title : "Claim Request");
@@ -218,8 +247,43 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
         final Long pendingTimestamp = pending.getLong("timestamp");
         if (tvCurrentClaimId != null) tvCurrentClaimId.setText(pending.getId());
         if (tvCurrentReceiver != null) {
-            String receiver = pending.getString("claimerName");
+            String receiver = isPoster ? pending.getString("claimerName") : pending.getString("posterName");
             tvCurrentReceiver.setText(receiver != null && !receiver.trim().isEmpty() ? receiver : "Unknown");
+        }
+        if (btnApproveProcessing instanceof TextView) {
+            ((TextView) btnApproveProcessing).setText(isPoster ? "Approve" : "Yes");
+        }
+        if (btnRejectProcessing instanceof TextView) {
+            ((TextView) btnRejectProcessing).setText(isPoster ? "Reject" : "No");
+        }
+        bindCurrentContactActions(pending);
+        if (tvCurrentColorAnswer != null) {
+            String colorAns = pending.getString("colorAns");
+            tvCurrentColorAnswer.setText("Color: " + (colorAns != null && !colorAns.trim().isEmpty() ? colorAns.trim() : "-"));
+        }
+        if (tvCurrentBrandAnswer != null) {
+            String brandAns = pending.getString("brandAns");
+            tvCurrentBrandAnswer.setText("Brand: " + (brandAns != null && !brandAns.trim().isEmpty() ? brandAns.trim() : "-"));
+        }
+        if (tvCurrentMarkAnswer != null) {
+            String markAns = pending.getString("markAns");
+            tvCurrentMarkAnswer.setText("Mark: " + (markAns != null && !markAns.trim().isEmpty() ? markAns.trim() : "-"));
+        }
+
+        String claimUploadedImageUrl = firstNonEmpty(
+                pending.getString("claimerPhotoUrl"),
+                pending.getString("claimPhotoUrl"),
+                pending.getString("uploadedImageUrl"),
+                pending.getString("proofImageUrl"),
+                pending.getString("imageUrl")
+        );
+        if (claimUploadedImageUrl != null && ivCurrentItem != null) {
+            Glide.with(this)
+                    .load(claimUploadedImageUrl)
+                    .placeholder(R.drawable.electronics)
+                    .centerCrop()
+                    .into(ivCurrentItem);
+            return;
         }
 
         String itemId = pending.getString("itemId");
@@ -263,6 +327,118 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
                 });
     }
 
+    private String firstNonEmpty(String... values) {
+        if (values == null) return null;
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) return value.trim();
+        }
+        return null;
+    }
+
+    private void bindCurrentContactActions(DocumentSnapshot claimDoc) {
+        String posterUid = claimDoc.getString("posterUid");
+        String claimerUid = claimDoc.getString("claimerUid");
+        String otherUserUid = null;
+        if (!currentUserId.isEmpty()) {
+            if (currentUserId.equals(posterUid)) {
+                otherUserUid = claimerUid;
+            } else if (currentUserId.equals(claimerUid)) {
+                otherUserUid = posterUid;
+            }
+        }
+        if (otherUserUid == null || otherUserUid.trim().isEmpty()) {
+            otherUserUid = claimerUid != null && !claimerUid.trim().isEmpty() ? claimerUid : posterUid;
+        }
+        if (otherUserUid == null || otherUserUid.trim().isEmpty()) {
+            setContactButtonsEnabled(false);
+            return;
+        }
+
+        setContactButtonsEnabled(false);
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("users")
+                .document(otherUserUid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    currentContactPhone = safeText(documentSnapshot.getString("phone"));
+                    currentContactEmail = safeText(documentSnapshot.getString("email"));
+                    setupCurrentContactClickListeners();
+                    setContactButtonsEnabled(true);
+                })
+                .addOnFailureListener(e -> setContactButtonsEnabled(false));
+    }
+
+    private void setupCurrentContactClickListeners() {
+        if (btnCurrentCall != null) {
+            btnCurrentCall.setOnClickListener(v -> {
+                if (currentContactPhone.isEmpty()) {
+                    Toast.makeText(this, "No phone number available.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                    callIntent.setData(Uri.parse("tel:" + currentContactPhone));
+                    startActivity(callIntent);
+                } catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(this, "No dialer app found.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        if (btnCurrentEmail != null) {
+            btnCurrentEmail.setOnClickListener(v -> {
+                if (currentContactEmail.isEmpty()) {
+                    Toast.makeText(this, "No email available.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                try {
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                    emailIntent.setData(Uri.parse("mailto:" + currentContactEmail));
+                    startActivity(emailIntent);
+                } catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(this, "No email app found.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        if (btnCurrentWhatsapp != null) {
+            btnCurrentWhatsapp.setOnClickListener(v -> {
+                if (currentContactPhone.isEmpty()) {
+                    Toast.makeText(this, "No phone number available.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String url = "https://api.whatsapp.com/send?phone=" + currentContactPhone;
+                try {
+                    Intent whatsappIntent = new Intent(Intent.ACTION_VIEW);
+                    whatsappIntent.setData(Uri.parse(url));
+                    startActivity(whatsappIntent);
+                } catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(this, "WhatsApp not installed.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void setContactButtonsEnabled(boolean enabled) {
+        if (btnCurrentCall != null) {
+            btnCurrentCall.setEnabled(enabled);
+            btnCurrentCall.setAlpha(enabled ? 1f : 0.5f);
+        }
+        if (btnCurrentEmail != null) {
+            btnCurrentEmail.setEnabled(enabled);
+            btnCurrentEmail.setAlpha(enabled ? 1f : 0.5f);
+        }
+        if (btnCurrentWhatsapp != null) {
+            btnCurrentWhatsapp.setEnabled(enabled);
+            btnCurrentWhatsapp.setAlpha(enabled ? 1f : 0.5f);
+        }
+    }
+
+    private String safeText(String value) {
+        if (value == null) return "";
+        String trimmed = value.trim();
+        if (trimmed.isEmpty() || "Not available".equalsIgnoreCase(trimmed)) return "";
+        return trimmed;
+    }
+
     private String getTimeAgo(Long timestamp) {
         if (timestamp == null || timestamp <= 0) return "just now";
         long diff = System.currentTimeMillis() - timestamp;
@@ -277,21 +453,48 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
 
     @Override
     public void onApprove(DocumentSnapshot claimDoc) {
-        updateClaimStatus(claimDoc, "APPROVED");
+        boolean isPoster = isCurrentUserPosterForClaim(claimDoc);
+        String status = claimDoc.getString("status");
+        if (isPoster && "PENDING".equalsIgnoreCase(status)) {
+            updateClaimStatus(claimDoc, "PENDING_CLAIMER_CONFIRMATION");
+        } else if (!isPoster && "PENDING_CLAIMER_CONFIRMATION".equalsIgnoreCase(status)) {
+            updateClaimStatus(claimDoc, "APPROVED");
+        }
     }
 
     @Override
     public void onReject(DocumentSnapshot claimDoc) {
-        updateClaimStatus(claimDoc, "REJECTED");
+        boolean isPoster = isCurrentUserPosterForClaim(claimDoc);
+        String status = claimDoc.getString("status");
+        if (isPoster && "PENDING".equalsIgnoreCase(status)) {
+            updateClaimStatus(claimDoc, "REJECTED");
+        } else if (!isPoster && "PENDING_CLAIMER_CONFIRMATION".equalsIgnoreCase(status)) {
+            updateClaimStatus(claimDoc, "REJECTED");
+        }
+    }
+
+    @Override
+    public void onOpenClaim(DocumentSnapshot claimDoc) {
+        String status = claimDoc.getString("status");
+        if (!"APPROVED".equalsIgnoreCase(status)) {
+            return;
+        }
+        bindCurrentContactActions(claimDoc);
+        showApprovedClaimContactDialog();
     }
 
     private void updateClaimStatus(DocumentSnapshot claimDoc, String newStatus) {
         String claimId = claimDoc.getId();
-        
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", newStatus);
+        if ("APPROVED".equals(newStatus)) {
+            updates.put("approvedByName", resolveCurrentUserName());
+        }
+
         FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26").collection("claims").document(claimId)
-                .update("status", newStatus)
+                .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Claim " + newStatus.toLowerCase(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Claim " + newStatus.toLowerCase().replace('_', ' '), Toast.LENGTH_SHORT).show();
                     
                     // If approved, globally tag the item as CLAIMED
                     if ("APPROVED".equals(newStatus)) {
@@ -306,6 +509,79 @@ public class AlertsActivity extends AppCompatActivity implements AlertAdapter.On
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error updating claim", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private boolean isCurrentUserPosterForClaim(DocumentSnapshot claimDoc) {
+        String posterUid = claimDoc.getString("posterUid");
+        return posterUid != null && posterUid.equals(currentUserId);
+    }
+
+    private String resolveCurrentUserName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return "Poster";
+        String displayName = user.getDisplayName();
+        if (displayName != null && !displayName.trim().isEmpty()) return displayName.trim();
+        String email = user.getEmail();
+        if (email != null && !email.trim().isEmpty()) return email.trim();
+        return "Poster";
+    }
+
+    private void showApprovedClaimContactDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_claim_contact_actions, null, false);
+        Button btnCall = dialogView.findViewById(R.id.btnDialogCall);
+        Button btnEmail = dialogView.findViewById(R.id.btnDialogEmail);
+        Button btnWhatsApp = dialogView.findViewById(R.id.btnDialogWhatsapp);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Contact options")
+                .setView(dialogView)
+                .setNegativeButton("Close", null)
+                .create();
+
+        if (btnCall != null) btnCall.setOnClickListener(v -> {
+            if (currentContactPhone.isEmpty()) {
+                Toast.makeText(this, "No phone number available.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                callIntent.setData(Uri.parse("tel:" + currentContactPhone));
+                startActivity(callIntent);
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(this, "No dialer app found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (btnEmail != null) btnEmail.setOnClickListener(v -> {
+            if (currentContactEmail.isEmpty()) {
+                Toast.makeText(this, "No email available.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                emailIntent.setData(Uri.parse("mailto:" + currentContactEmail));
+                startActivity(emailIntent);
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(this, "No email app found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (btnWhatsApp != null) btnWhatsApp.setOnClickListener(v -> {
+            if (currentContactPhone.isEmpty()) {
+                Toast.makeText(this, "No phone number available.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String url = "https://api.whatsapp.com/send?phone=" + currentContactPhone;
+            try {
+                Intent whatsappIntent = new Intent(Intent.ACTION_VIEW);
+                whatsappIntent.setData(Uri.parse(url));
+                startActivity(whatsappIntent);
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(this, "WhatsApp not installed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        dialog.show();
     }
 
     @Override

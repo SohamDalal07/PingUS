@@ -1,31 +1,38 @@
 package com.example.backtoyou;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +48,9 @@ public class HomeFragment extends Fragment {
     private FeedCardAdapter                 adapter;
     private final List<Map<String, Object>> allItems      = new ArrayList<>();
     private final List<Map<String, Object>> filteredItems = new ArrayList<>();
+    private final Map<String, Map<String, Object>> approvedClaimsByItemId = new HashMap<>();
     private ListenerRegistration            listenerReg;
+    private ListenerRegistration            claimsListenerReg;
 
     private String currentFilter = "ALL";
     private String searchQuery   = "";
@@ -65,6 +74,7 @@ public class HomeFragment extends Fragment {
         setupViewAll();
         setFilter("ALL");
         listenToFeed();
+        listenToApprovedClaimsForPoster();
     }
 
     private void bindViews(View view) {
@@ -95,6 +105,10 @@ public class HomeFragment extends Fragment {
 
     private void setupRecyclerView() {
         adapter = new FeedCardAdapter(filteredItems, item -> {
+            if (isClaimModeItem(item)) {
+                openClaimContactActions(item);
+                return;
+            }
             Intent intent = new Intent(getActivity(), ItemDetailActivity.class);
             intent.putExtra("title", getString(item, "title"));
             intent.putExtra("type", getString(item, "type"));
@@ -116,6 +130,30 @@ public class HomeFragment extends Fragment {
         rvFeed.setAdapter(adapter);
         rvFeed.setHasFixedSize(false);
         rvFeed.setNestedScrollingEnabled(false);
+    }
+
+    private void listenToApprovedClaimsForPoster() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        String currentUserId = user.getUid();
+
+        claimsListenerReg = FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("claims")
+                .whereEqualTo("posterUid", currentUserId)
+                .whereEqualTo("status", "APPROVED")
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null || snapshots == null) return;
+                    approvedClaimsByItemId.clear();
+                    for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                        String itemId = doc.getString("itemId");
+                        if (itemId == null || itemId.trim().isEmpty()) continue;
+                        Map<String, Object> claim = new HashMap<>();
+                        if (doc.getData() != null) claim.putAll(doc.getData());
+                        claim.put("claimId", doc.getId());
+                        approvedClaimsByItemId.put(itemId, claim);
+                    }
+                    applyFilterAndSearch();
+                });
     }
 
     private void setupChips() {
@@ -204,7 +242,21 @@ public class HomeFragment extends Fragment {
             switch (currentFilter) {
                 case "LOST":   passesFilter = "LOST".equals(type);         break;
                 case "FOUND":  passesFilter = "FOUND".equals(type);        break;
-                case "CLAIMS": passesFilter = currentUserId.equals(postedByUid); break;
+                case "CLAIMS": {
+                    String itemId = getString(item, "itemId");
+                    Map<String, Object> claim = approvedClaimsByItemId.get(itemId);
+                    if (claim != null) {
+                        item.put("isClaimModeItem", true);
+                        item.put("claimClaimerUid", claim.get("claimerUid"));
+                        item.put("claimClaimerName", claim.get("claimerName"));
+                    } else {
+                        item.remove("isClaimModeItem");
+                        item.remove("claimClaimerUid");
+                        item.remove("claimClaimerName");
+                    }
+                    passesFilter = currentUserId.equals(postedByUid) && claim != null;
+                    break;
+                }
                 case "MINE":   passesFilter = currentUserId.equals(postedByUid); break;
             }
             boolean passesSearch = searchQuery.isEmpty()
@@ -217,6 +269,90 @@ public class HomeFragment extends Fragment {
         boolean empty = filteredItems.isEmpty();
         rvFeed.setVisibility(empty ? View.GONE : View.VISIBLE);
         layoutEmptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean isClaimModeItem(Map<String, Object> item) {
+        Object flag = item.get("isClaimModeItem");
+        return flag instanceof Boolean && (Boolean) flag;
+    }
+
+    private void openClaimContactActions(Map<String, Object> item) {
+        String claimerUid = getString(item, "claimClaimerUid");
+        if (claimerUid.isEmpty()) {
+            Toast.makeText(requireContext(), "No claimer details available.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        FirebaseFirestore.getInstance(FirebaseApp.getInstance(), "lf26")
+                .collection("users")
+                .document(claimerUid)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    String phone = valueOrEmpty(doc.getString("phone"));
+                    String email = valueOrEmpty(doc.getString("email"));
+                    showClaimContactDialog(phone, email);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(requireContext(), "Unable to load contact details.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void showClaimContactDialog(String phone, String email) {
+        View dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_home_claim_contact_actions, null, false);
+        Button btnCall = dialogView.findViewById(R.id.btnHomeDialogCall);
+        Button btnMessage = dialogView.findViewById(R.id.btnHomeDialogMessage);
+        Button btnEmail = dialogView.findViewById(R.id.btnHomeDialogEmail);
+
+        AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                .setTitle("Contact claimer")
+                .setView(dialogView)
+                .setNegativeButton("Close", null)
+                .create();
+
+        btnCall.setOnClickListener(v -> {
+            if (phone.isEmpty()) {
+                Toast.makeText(requireContext(), "No phone number available.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone)));
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(requireContext(), "No dialer app found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnMessage.setOnClickListener(v -> {
+            if (phone.isEmpty()) {
+                Toast.makeText(requireContext(), "No phone number available.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:" + phone)));
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(requireContext(), "No messaging app found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        btnEmail.setOnClickListener(v -> {
+            if (email.isEmpty()) {
+                Toast.makeText(requireContext(), "No email available.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + email)));
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(requireContext(), "No email app found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private String valueOrEmpty(String value) {
+        if (value == null) return "";
+        String trimmed = value.trim();
+        if (trimmed.isEmpty() || "Not available".equalsIgnoreCase(trimmed)) return "";
+        return trimmed;
     }
 
     private String getEmptyStateMessage() {
@@ -247,5 +383,6 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         if (listenerReg != null) listenerReg.remove();
+        if (claimsListenerReg != null) claimsListenerReg.remove();
     }
 }

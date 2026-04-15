@@ -29,6 +29,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHol
     public interface OnClaimActionListener {
         void onApprove(DocumentSnapshot claimDoc);
         void onReject(DocumentSnapshot claimDoc);
+        void onOpenClaim(DocumentSnapshot claimDoc);
     }
 
     public AlertAdapter(List<DocumentSnapshot> claimsList, String currentUserId, OnClaimActionListener listener) {
@@ -50,6 +51,8 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHol
         
         String title = doc.getString("itemTitle");
         String claimerName = doc.getString("claimerName");
+        String posterName = doc.getString("posterName");
+        String approvedByName = doc.getString("approvedByName");
         String color = doc.getString("colorAns");
         String brand = doc.getString("brandAns");
         String mark = doc.getString("markAns");
@@ -67,16 +70,29 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHol
         boolean isClaimer = currentUserId != null && currentUserId.equals(claimerUid);
         holder.btnApprove.setVisibility(View.GONE);
         holder.btnReject.setVisibility(View.GONE);
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onOpenClaim(doc);
+        });
 
         if ("APPROVED".equals(status)) {
             if (isClaimer) {
-                holder.tvClaimerName.setText("Status: APPROVED by the poster!");
+                String approver = firstNonEmpty(approvedByName, posterName, "Poster");
+                holder.tvClaimerName.setText("Status: APPROVED by " + approver + "!");
             } else {
                 holder.tvClaimerName.setText("Status: You APPROVED this claim! (Item Claimed)");
             }
             holder.tvClaimerName.setTextColor(holder.itemView.getContext().getColor(R.color.colorFoundBg));
+        } else if ("PENDING_CLAIMER_CONFIRMATION".equals(status)) {
+            if (isClaimer) {
+                holder.tvClaimerName.setText("Status: Please confirm in current processing (Yes/No).");
+            } else {
+                holder.tvClaimerName.setText("Status: Waiting for claimer confirmation.");
+            }
+            holder.tvClaimerName.setTextColor(holder.itemView.getContext().getColor(R.color.colorTextSecondary));
         } else if ("REJECTED".equals(status)) {
-            holder.tvClaimerName.setText("Status: You REJECTED this claim.");
+            holder.tvClaimerName.setText(isClaimer
+                    ? "Status: Claim closed."
+                    : "Status: You REJECTED this claim.");
             holder.tvClaimerName.setTextColor(holder.itemView.getContext().getColor(R.color.colorLostBg));
         } else {
             // PENDING state
@@ -88,6 +104,14 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.AlertViewHol
                 holder.tvClaimerName.setTextColor(holder.itemView.getContext().getColor(R.color.colorTextSecondary));
             }
         }
+    }
+
+    private String firstNonEmpty(String... values) {
+        if (values == null) return "";
+        for (String value : values) {
+            if (value != null && !value.trim().isEmpty()) return value.trim();
+        }
+        return "";
     }
 
     @Override
