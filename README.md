@@ -30,7 +30,7 @@ The project utilizes an Activity and Fragment-driven architectural pattern, cons
 
 1. **Clone the Project:**
    ```bash
-   git clone https://github.com/YourUsername/BackToYou.git
+   git clone https://github.com/YourUsername/PingUS.git
    ```
 2. **Open in IDE:**
    Open the target folder inside **Android Studio**.
