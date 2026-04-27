@@ -45,7 +45,7 @@ The project utilizes an Activity and Fragment-driven architectural pattern, cons
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="login_screen.jpeg" alt="Login Screen" width="30%" style="margin-right: 2%;"/>
+  <img src="login_scren.jpeg" alt="Login Screen" width="30%" style="margin-right: 2%;"/>
   <img src="homescreen.jpeg" alt="Home Screen" width="30%" style="margin-right: 2%;"/>
   <img src="report.jpeg" alt="Report Screen" width="30%"/>
 </p>
