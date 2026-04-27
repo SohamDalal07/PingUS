@@ -1,6 +1,6 @@
-# BackToYou: Secure Lost & Found System
+# PingUS: Secure Lost & Found System
 
-**BackToYou** is a comprehensive Android application designed to facilitate the reporting and secure recovery of lost and found items. It features a robust **"Blind Handshake"** validation workflow to prevent fraudulent claims and ensure items are safely returned to their rightful owners.
+**PingUS** is a comprehensive Android application designed to facilitate the reporting and secure recovery of lost and found items. It features a robust **"Blind Handshake"** validation workflow to prevent fraudulent claims and ensure items are safely returned to their rightful owners.
 
 ## 📱 Key Features
 
